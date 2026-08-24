@@ -1,0 +1,4 @@
+import { CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { PublicHeader } from '../components/PublicHeader';
+export function Confirmation(){const nav=useNavigate();return <><PublicHeader/><main className="confirmation"><div className="steps"><span className="done">1 Planos ✓</span><span className="done">2 Pré-aprovação ✓</span><span className="done">3 Pagamento ✓</span><span className="active">4 Confirmação</span></div><CheckCircle2 className="success-icon"/><h1>Assinatura confirmada!</h1><p>Seu acesso ao XNaMai Club foi ativado com sucesso.</p><div className="confirmation-card"><h2>Pagamento aprovado e assinatura ativa</h2><p>A assinatura recorrente foi criada. Acompanhe plano, cobrança e situação na sua área.</p><button className="btn primary large" onClick={()=>nav('/app')}>Ir para minha assinatura</button></div></main></>}
