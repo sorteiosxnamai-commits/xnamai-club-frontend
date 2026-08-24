@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Check, Crown, Diamond, Rocket, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api, money } from '../api/client';
+import { useAuth } from '../auth/AuthContext';
 import { PublicHeader } from '../components/PublicHeader';
 
 export type Plan = { id: string; code: string; name: string; monthlyPriceCents: number | null; purchaseLimitCents: number | null; description: string };
@@ -12,12 +13,15 @@ export function Plans() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { user } = useAuth();
   useEffect(() => { api<Plan[]>('/plans').then(setPlans).catch(e => setError(e.message)); }, []);
 
   function choose(plan: Plan) {
     if (plan.code === 'ENTERPRISE') return alert('Fluxo Enterprise: integrar formulário comercial/CRM.');
     sessionStorage.setItem('selected_plan', JSON.stringify(plan));
-    navigate('/cadastro');
+    if (user?.role === 'CUSTOMER') navigate('/checkout');
+    else if (user?.role === 'ADMIN') navigate('/admin');
+    else navigate('/cadastro');
   }
 
   return <>

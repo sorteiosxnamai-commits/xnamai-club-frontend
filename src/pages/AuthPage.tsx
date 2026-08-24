@@ -1,13 +1,19 @@
 import { FormEvent, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { PublicHeader } from '../components/PublicHeader';
 import { useAuth } from '../auth/AuthContext';
 
 export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
-  const { login, register } = useAuth();
+  const { login, register, user, loading } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [form, setForm] = useState({ name: '', companyName: '', email: '', password: '' });
+
+  if (!loading && user) {
+    if (user.role === 'ADMIN') return <Navigate to="/admin" replace />;
+    if (sessionStorage.getItem('selected_plan')) return <Navigate to="/checkout" replace />;
+    return <Navigate to="/app" replace />;
+  }
 
   async function submit(e: FormEvent) {
     e.preventDefault(); setError('');
