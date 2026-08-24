@@ -1,4 +1,9 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+function resolveApiUrl() {
+  const raw = String(import.meta.env.VITE_API_URL || 'http://localhost:4000/api').trim().replace(/\/$/, '');
+  return raw.endsWith('/api') ? raw : `${raw}/api`;
+}
+
+const API_URL = resolveApiUrl();
 
 export type ApiError = { message: string };
 
