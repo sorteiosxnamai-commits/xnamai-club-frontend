@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { AlertCircle, BadgeDollarSign, CheckCircle2, LayoutDashboard, ReceiptText, TrendingDown, TrendingUp, Users } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { AlertCircle, BadgeDollarSign, CheckCircle2, TrendingDown, TrendingUp, Users } from 'lucide-react';
 import { api, money } from '../api/client';
-import { Brand } from '../components/Brand';
-import { useAuth } from '../auth/AuthContext';
+import { AdminHeader } from '../components/AdminShell';
 
 type MonthRevenue = { key: string; label: string; revenueCents: number };
 
@@ -23,38 +21,21 @@ const EMPTY_MONTHS: MonthRevenue[] = [];
 export function AdminDashboard() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [error, setError] = useState('');
-  const { logout } = useAuth();
-  const nav = useNavigate();
 
   useEffect(() => {
     api<Metrics>('/admin/dashboard').then(setMetrics).catch((e) => setError(e.message));
   }, []);
 
   return (
-    <div className="admin-shell">
-      <aside className="admin-sidebar">
-        <Brand admin />
-        <nav>
-          <a className="active"><LayoutDashboard />Dashboard</a>
-          <a><Users />Assinaturas</a>
-          <a><ReceiptText />Cobranças</a>
-          <a><Users />Clientes</a>
-        </nav>
-        <button className="btn ghost full" onClick={() => { logout(); nav('/'); }}>Sair</button>
-      </aside>
-      <main className="admin-main">
-        <header className="admin-header">
-          <div>
-            <h1>Dashboard do Clube</h1>
-            <p>Acompanhe assinaturas, cobranças e crescimento do XNaMai Club.</p>
-          </div>
-          <span className="admin-chip">Admin XNaMai</span>
-        </header>
-        {error && <div className="error-box">{error}</div>}
-        {!metrics && !error && <p className="admin-loading">Carregando métricas reais…</p>}
-        {metrics && <DashboardBody metrics={metrics} />}
-      </main>
-    </div>
+    <>
+      <AdminHeader
+        title="Dashboard do Clube"
+        subtitle="Acompanhe assinaturas, cobranças e crescimento do XNaMai Club."
+      />
+      {error && <div className="error-box">{error}</div>}
+      {!metrics && !error && <p className="admin-loading">Carregando métricas reais…</p>}
+      {metrics && <DashboardBody metrics={metrics} />}
+    </>
   );
 }
 
