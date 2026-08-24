@@ -14,13 +14,14 @@ export function Checkout() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   if (!plan) return <Navigate to="/planos" replace/>;
+  const selectedPlan = plan;
 
   async function finish() {
     setBusy(true); setError('');
     try {
       const digits = card.number.replace(/\D/g,'');
       const last4 = method === 'CREDIT_CARD' ? (digits.slice(-4) || '4242') : undefined;
-      await api('/subscriptions', { method:'POST', body: JSON.stringify({ planId: plan.id, paymentMethodType: method, paymentToken: `pm_demo_${Date.now()}`, cardBrand: method === 'CREDIT_CARD' ? 'Visa' : undefined, cardLastFour: last4 }) });
+      await api('/subscriptions', { method:'POST', body: JSON.stringify({ planId: selectedPlan.id, paymentMethodType: method, paymentToken: `pm_demo_${Date.now()}`, cardBrand: method === 'CREDIT_CARD' ? 'Visa' : undefined, cardLastFour: last4 }) });
       sessionStorage.removeItem('selected_plan');
       navigate('/confirmacao');
     } catch(e) { setError((e as Error).message); } finally { setBusy(false); }
