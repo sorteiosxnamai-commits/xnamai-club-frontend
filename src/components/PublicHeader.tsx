@@ -19,7 +19,7 @@ export function PublicHeader() {
         {!user ? (
           <>
             <button className="btn ghost" onClick={() => navigate('/login')}>Entrar</button>
-            <button className="btn primary" onClick={() => navigate('/planos')}>Quero assinar</button>
+            <Link className="btn primary" to="/planos">Quero assinar</Link>
           </>
         ) : (
           <button className="account-chip" onClick={() => { logout(); navigate('/'); }}>
