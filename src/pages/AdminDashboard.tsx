@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { AlertCircle, BadgeDollarSign, CheckCircle2, TrendingDown, TrendingUp, Users } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { AlertCircle, BadgeDollarSign, CalendarClock, CheckCircle2, TrendingDown, TrendingUp, Users } from 'lucide-react';
 import { api, money } from '../api/client';
 import { AdminHeader } from '../components/AdminShell';
-
-type MonthRevenue = { key: string; label: string; revenueCents: number };
+import { RevenueBars, type MonthRevenue } from './adminShared';
 
 type Metrics = {
   activeSubscribers: number;
@@ -14,6 +13,10 @@ type Metrics = {
   growthPercent: number;
   newSubscribers: number;
   revenueByMonth: MonthRevenue[];
+  nextMonthForecastCents: number;
+  yearForecastCents: number;
+  forecastSubscribers: number;
+  forecastByMonth: MonthRevenue[];
 };
 
 const EMPTY_MONTHS: MonthRevenue[] = [];
@@ -41,10 +44,7 @@ export function AdminDashboard() {
 
 function DashboardBody({ metrics }: { metrics: Metrics }) {
   const months = metrics.revenueByMonth ?? EMPTY_MONTHS;
-  const maxRevenue = useMemo(
-    () => Math.max(0, ...months.map((row) => row.revenueCents)),
-    [months],
-  );
+  const forecastMonths = metrics.forecastByMonth ?? EMPTY_MONTHS;
   const growing = metrics.growthPercent > 0;
   const shrinking = metrics.growthPercent < 0;
   const tone = growing ? 'ok' : shrinking ? 'warn' : 'neutral';
@@ -92,19 +92,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
             <h2>Receita mensal</h2>
             <strong>{money(metrics.monthlyRevenueCents)}</strong>
           </div>
-          <div className="fake-chart">
-            {months.map((row) => {
-              const height = maxRevenue === 0 ? 8 : Math.max(8, Math.round((row.revenueCents / maxRevenue) * 100));
-              return (
-                <div key={row.key} style={{ height: `${height}%` }} className={row.revenueCents === 0 ? 'chart-bar-empty' : undefined}>
-                  {row.revenueCents > 0 && <em>{money(row.revenueCents)}</em>}
-                </div>
-              );
-            })}
-          </div>
-          <div className="chart-months">
-            {months.map((row) => <span key={row.key}>{row.label}</span>)}
-          </div>
+          <RevenueBars months={months} />
         </div>
         <div className={`panel admin-positive ${tone}`}>
           <InsightIcon />
@@ -118,6 +106,26 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
                 : shrinking
                   ? 'A receita deste mês ficou abaixo do período anterior.'
                   : 'Os números abaixo refletem as cobranças já confirmadas.'}
+          </p>
+        </div>
+      </section>
+      <section className="admin-grid forecast-grid">
+        <div className="panel chart-card">
+          <div className="section-title">
+            <h2>Previsão de receita — 12 meses</h2>
+            <strong>{money(metrics.yearForecastCents)}</strong>
+          </div>
+          <p className="forecast-copy">Com base nas assinaturas ativas, cada mês seguinte repete a mensalidade corrente.</p>
+          <RevenueBars months={forecastMonths} className="forecast-chart" />
+        </div>
+        <div className="panel admin-positive">
+          <CalendarClock />
+          <h2>Próximo mês</h2>
+          <strong>{money(metrics.nextMonthForecastCents)}</strong>
+          <p>
+            {metrics.forecastSubscribers === 0
+              ? 'Sem assinaturas recorrentes para projetar.'
+              : `Receita esperada de ${metrics.forecastSubscribers} ${metrics.forecastSubscribers === 1 ? 'assinante' : 'assinantes'} na próxima renovação.`}
           </p>
         </div>
       </section>
