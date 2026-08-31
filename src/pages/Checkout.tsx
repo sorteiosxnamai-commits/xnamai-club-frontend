@@ -3,7 +3,7 @@ import { CreditCard, QrCode, ShieldCheck } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { api, money } from '../api/client';
 import { PublicHeader } from '../components/PublicHeader';
-import { Plan } from './Plans';
+import { Plan, PlanPrice } from './Plans';
 
 function addCalendarMonth(from = new Date()) {
   const next = new Date(from);
@@ -73,7 +73,7 @@ export function Checkout() {
           <aside className="panel plan-summary">
             <div className="diamond-mark">◇</div>
             <h2>{plan.name}</h2>
-            <div className="checkout-price">{money(plan.monthlyPriceCents)}<small>/mês</small></div>
+            <div className="checkout-price"><PlanPrice plan={plan} /></div>
             <p>{plan.description}</p>
             <ul>
               <li>✓ Preços diferenciados</li>
@@ -116,6 +116,9 @@ export function Checkout() {
           <aside className="panel order-summary">
             <h2>Resumo da assinatura</h2>
             <div><span>Plano</span><b>{plan.name}</b></div>
+            {plan.compareAtPriceCents != null && (
+              <div><span>De</span><b className="price-was">{money(plan.compareAtPriceCents)}</b></div>
+            )}
             <div><span>Mensalidade</span><b>{money(plan.monthlyPriceCents)}</b></div>
             <div><span>Forma</span><b>{method === 'CREDIT_CARD' ? 'Cartão' : 'PIX recorrente'}</b></div>
             <div><span>Próxima cobrança</span><b>{formatDate(nextCharge)}</b></div>

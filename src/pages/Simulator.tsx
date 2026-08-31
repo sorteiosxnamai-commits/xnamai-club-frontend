@@ -7,7 +7,7 @@ const brl = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', c
 export function Simulator() {
   const [spend, setSpend] = useState(55000);
   const calc = useMemo(() => ({ min: spend * .15, avg: spend * .20, max: spend * .25 }), [spend]);
-  const recommended = spend <= 10000 ? 'Plano Start' : spend <= 25000 ? 'Plano Growth' : spend <= 50000 ? 'Plano Pro' : spend <= 100000 ? 'Plano Max' : 'Enterprise';
+  const recommended = 'Plano Lançamento';
   return <>
     <PublicHeader />
     <main className="public-page simulator-page">

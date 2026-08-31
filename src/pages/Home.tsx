@@ -13,7 +13,7 @@ export function Home() {
         <p>Assinaturas empresariais com condições comerciais exclusivas, economia estimada e acompanhamento completo da sua assinatura.</p>
         <div className="hero-buttons">
           <button className="btn primary large" onClick={() => navigate('/simulador')}>Simular economia <ArrowRight size={18}/></button>
-          <button className="btn ghost large" onClick={() => navigate('/planos')}>Ver planos</button>
+          <button className="btn ghost large" onClick={() => navigate('/planos')}>Ver plano</button>
         </div>
       </section>
       <section className="value-grid">
