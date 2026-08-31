@@ -11,6 +11,7 @@ export function PublicHeader() {
       <nav className="nav-links">
         <NavLink to="/">Início</NavLink>
         <NavLink to="/planos">Planos</NavLink>
+        <NavLink to="/regras">Regras</NavLink>
         <NavLink to="/simulador">Simulador</NavLink>
         {user?.role === 'CUSTOMER' && <NavLink to="/app">Minha conta</NavLink>}
         {user?.role === 'ADMIN' && <NavLink to="/admin">Admin</NavLink>}

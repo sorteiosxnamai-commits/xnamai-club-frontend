@@ -4,6 +4,7 @@ import { Protected } from './components/Protected';
 import { AdminShell } from './components/AdminShell';
 import { Home } from './pages/Home';
 import { Plans } from './pages/Plans';
+import { Rules } from './pages/Rules';
 import { Simulator } from './pages/Simulator';
 import { AuthPage } from './pages/AuthPage';
 import { Checkout } from './pages/Checkout';
@@ -21,6 +22,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/planos" element={<Plans />} />
+          <Route path="/regras" element={<Rules />} />
           <Route path="/simulador" element={<Simulator />} />
           <Route path="/login" element={<AuthPage mode="login" />} />
           <Route path="/cadastro" element={<AuthPage mode="register" />} />
