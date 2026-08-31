@@ -30,8 +30,13 @@ export function Checkout() {
   const selectedPlan = plan;
 
   async function finish() {
+    if (busy) return;
     if (method !== 'CREDIT_CARD') {
       setError('A recorrência nesta etapa é autorizada no cartão pela Stripe. PIX recorrente entra em seguida.');
+      return;
+    }
+    if (!selectedPlan.id) {
+      setError('Plano inválido. Volte em Planos e escolha novamente.');
       return;
     }
     setBusy(true);
