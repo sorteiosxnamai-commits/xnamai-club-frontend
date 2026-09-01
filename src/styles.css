@@ -25,6 +25,7 @@
 .desk-search{display:grid;gap:8px;margin:18px 0 8px;color:#dfe8f5;font-size:13px;font-weight:700;max-width:520px}
 .desk-search input{padding:13px;border-radius:8px;border:1px solid #2a3b59;background:#07101d;color:#fff;outline:none;font-weight:500}
 .desk-search input:focus{border-color:#2178ff}
+.desk-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .cashback-check{display:flex;align-items:center;gap:8px;cursor:pointer;color:#dfe8f5;font-size:13px}
 .cashback-check input{width:18px;height:18px;accent-color:#1c74ff}
 .cashback-check.used{color:#85dbab;cursor:default}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Headset } from 'lucide-react';
+import { Headset, RefreshCw } from 'lucide-react';
 import { api, money } from '../api/client';
 import { PublicHeader } from '../components/PublicHeader';
 import { StatusBadge, formatDate, subscriptionStatusLabel } from './adminShared';
@@ -51,6 +51,13 @@ export function Atendimento() {
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [savingId, setSavingId] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function loadMembers() {
+    const members = await api<DeskMember[]>('/atendimento/members');
+    setError('');
+    setRows(members);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -121,7 +128,19 @@ export function Atendimento() {
             <h1>Atendimento</h1>
             <p>{copy.subtitle}</p>
           </div>
-          <span className="admin-chip"><Headset size={16} /> Time de atendimento</span>
+          <div className="desk-actions">
+            <span className="admin-chip"><Headset size={16} /> Time de atendimento</span>
+            <button
+              className="btn ghost"
+              disabled={refreshing}
+              onClick={() => {
+                setRefreshing(true);
+                loadMembers().catch((e) => setError((e as Error).message)).finally(() => setRefreshing(false));
+              }}
+            >
+              <RefreshCw size={16} /> {refreshing ? 'Atualizando\u2026' : 'Atualizar'}
+            </button>
+          </div>
         </header>
 
         <section className="kpi-grid forecast-kpis">
