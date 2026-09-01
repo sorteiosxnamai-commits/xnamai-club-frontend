@@ -15,7 +15,6 @@ export function PublicHeader() {
         <NavLink to="/simulador">Simulador</NavLink>
         {user?.role === 'CUSTOMER' && <NavLink to="/app">Minha conta</NavLink>}
         {user?.role === 'ADMIN' && <NavLink to="/admin">Admin</NavLink>}
-        <NavLink to="/atendimento">Atendimento</NavLink>
       </nav>
       <div className="header-actions">
         {!user ? (

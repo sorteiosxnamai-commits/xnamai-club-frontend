@@ -53,9 +53,25 @@ export function Atendimento() {
   const [savingId, setSavingId] = useState('');
 
   useEffect(() => {
-    api<DeskMember[]>('/atendimento/members')
-      .then(setRows)
-      .catch((e) => setError(e.message));
+    let cancelled = false;
+    async function load(attempt = 1) {
+      try {
+        const members = await api<DeskMember[]>('/atendimento/members');
+        if (!cancelled) {
+          setError('');
+          setRows(members);
+        }
+      } catch (e) {
+        if (cancelled) return;
+        if (attempt < 4) {
+          setTimeout(() => { void load(attempt + 1); }, 1200 * attempt);
+          return;
+        }
+        setError((e as Error).message);
+      }
+    }
+    void load();
+    return () => { cancelled = true; };
   }, []);
 
   const filtered = useMemo(() => {
