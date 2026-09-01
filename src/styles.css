@@ -8,3 +8,17 @@
 .plan-actions .btn{width:auto}
 .cancel-confirm{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .success-box{padding:12px 14px;border-radius:9px;border:1px solid #1c7352;background:#0b281f88;color:#85dbab;margin:15px 0}
+.pix-box p{margin:14px 0 0;color:#a9bad1;line-height:1.5}
+.auth-card{width:min(520px,95vw)}
+.auth-card select{padding:13px;border-radius:8px;border:1px solid #2a3b59;background:#07101d;color:#fff;outline:none;width:100%}
+.auth-card select:focus{border-color:#2178ff}
+.auth-card .two-cols{gap:12px}
+.auth-card .two-cols label{margin-top:12px}
+.logs-toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 4px}
+.logs-panel .forecast-copy{margin-top:12px}
+.vercel-log{margin:12px 0 0;padding:16px;border-radius:10px;background:#040910;border:1px solid #1a2d49;max-height:62vh;overflow:auto;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#c9d7ee;white-space:pre-wrap}
+.vercel-log-line{display:block;padding:2px 0}
+.vercel-log-line em{color:#6f829e;font-style:normal;margin-right:10px}
+.vercel-log-line b{color:#4b97ff;font-weight:700;margin-right:10px}
+.vercel-log-line.error{color:#ffb7b7}
+.vercel-log-line.warn{color:#f0c56e}

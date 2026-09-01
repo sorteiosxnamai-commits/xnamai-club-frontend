@@ -44,7 +44,9 @@ export function Confirmation() {
           {error
             ? error
             : ready
-              ? 'A Stripe autorizou o cartão, gerou o token da recorrência e agendou a próxima cobrança no mesmo dia do mês.'
+              ? sessionStorage.getItem('checkout_method') === 'PIX_RECURRING'
+                ? 'A Stripe confirmou o Pix Automático e agendou as próximas cobranças da assinatura.'
+                : 'A Stripe autorizou o cartão, gerou o token da recorrência e agendou a próxima cobrança no mesmo dia do mês.'
               : 'Confirmando autorização na Stripe...'}
         </p>
         <div className="confirmation-card">

@@ -129,7 +129,9 @@ export function CustomerDashboard() {
                   <b>
                     {data.paymentMethod?.type === 'CREDIT_CARD'
                       ? `${data.paymentMethod.cardBrand || 'Cartão'} •••• ${data.paymentMethod.cardLastFour || '----'}`
-                      : 'PIX recorrente'}
+                      : data.paymentMethod?.type === 'PIX_RECURRING'
+                        ? 'PIX recorrente'
+                        : 'Não informado'}
                   </b>
                 </div>
                 {subscription?.id && (

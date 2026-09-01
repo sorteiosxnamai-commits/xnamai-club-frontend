@@ -6,14 +6,27 @@ export type User = {
   email: string;
   name: string;
   companyName?: string;
+  city?: string;
+  state?: string;
+  document?: string;
   role: 'CUSTOMER' | 'ADMIN';
+};
+
+type RegisterInput = {
+  name: string;
+  email: string;
+  password: string;
+  companyName?: string;
+  city: string;
+  state: string;
+  document: string;
 };
 
 type AuthContextType = {
   user: User | null;
   loading: boolean;
   login(email: string, password: string): Promise<User>;
-  register(input: { name: string; email: string; password: string; companyName?: string }): Promise<User>;
+  register(input: RegisterInput): Promise<User>;
   logout(): void;
 };
 
@@ -38,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result.user;
   }
 
-  async function register(input: { name: string; email: string; password: string; companyName?: string }) {
+  async function register(input: RegisterInput) {
     const result = await api<{ token: string; user: User }>('/auth/register', { method: 'POST', body: JSON.stringify(input) });
     localStorage.setItem('xnamai_token', result.token);
     setUser(result.user);

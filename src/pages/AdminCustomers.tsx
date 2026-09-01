@@ -8,6 +8,9 @@ type AdminCustomer = {
   name?: string;
   email?: string;
   companyName?: string | null;
+  document?: string | null;
+  city?: string | null;
+  state?: string | null;
   phone?: string | null;
   createdAt: string;
   subscription?: {
@@ -16,6 +19,14 @@ type AdminCustomer = {
     plan?: { name?: string; monthlyPriceCents?: number | null } | null;
   } | null;
 };
+
+function formatDocument(value?: string | null) {
+  if (!value) return '';
+  const digits = value.replace(/\D/g, '');
+  if (digits.length === 11) return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  if (digits.length === 14) return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  return value;
+}
 
 export function AdminCustomers() {
   const [rows, setRows] = useState<AdminCustomer[] | null>(null);
@@ -56,7 +67,13 @@ export function AdminCustomers() {
                     <div className="cell-muted">{row.email}</div>
                     {row.phone && <div className="cell-muted">{row.phone}</div>}
                   </td>
-                  <td>{row.companyName || '—'}</td>
+                  <td>
+                    {row.companyName || '—'}
+                    {(row.city || row.state) && (
+                      <div className="cell-muted">{[row.city, row.state].filter(Boolean).join(' / ')}</div>
+                    )}
+                    {row.document && <div className="cell-muted">{formatDocument(row.document)}</div>}
+                  </td>
                   <td>
                     {row.subscription?.plan?.name || 'Sem plano'}
                     {row.subscription?.plan?.monthlyPriceCents != null && (

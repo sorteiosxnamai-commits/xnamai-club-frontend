@@ -14,6 +14,7 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { AdminSubscriptions } from './pages/AdminSubscriptions';
 import { AdminPayments } from './pages/AdminPayments';
 import { AdminCustomers } from './pages/AdminCustomers';
+import { AdminVercelLogs } from './pages/AdminVercelLogs';
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
             <Route path="assinaturas" element={<AdminSubscriptions />} />
             <Route path="cobrancas" element={<AdminPayments />} />
             <Route path="clientes" element={<AdminCustomers />} />
+            <Route path="logs" element={<AdminVercelLogs />} />
           </Route>
         </Routes>
       </AuthProvider>

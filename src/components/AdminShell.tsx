@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, ReceiptText, Repeat, Users } from 'lucide-react';
+import { LayoutDashboard, LogOut, ReceiptText, Repeat, ScrollText, Users } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Brand } from './Brand';
 import { useAuth } from '../auth/AuthContext';
@@ -10,6 +10,7 @@ function AdminNav() {
       <NavLink to="/admin/assinaturas"><Repeat />Assinaturas</NavLink>
       <NavLink to="/admin/cobrancas"><ReceiptText />Cobranças</NavLink>
       <NavLink to="/admin/clientes"><Users />Clientes</NavLink>
+      <NavLink to="/admin/logs"><ScrollText />Logs Vercel</NavLink>
     </>
   );
 }
