@@ -83,7 +83,7 @@ export function CustomerDashboard() {
     setError('');
     setSuccess('');
     try {
-      await api(`/subscriptions/${subscription.id}/cancel`, { method: 'POST' });
+      await api(`/subscriptions/${subscription.id}/cancel`, { method: 'POST', body: '{}' });
       setConfirming(false);
       await loadDashboard();
       setSuccess(
