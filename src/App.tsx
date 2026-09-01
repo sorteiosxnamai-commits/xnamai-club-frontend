@@ -15,6 +15,7 @@ import { AdminSubscriptions } from './pages/AdminSubscriptions';
 import { AdminPayments } from './pages/AdminPayments';
 import { AdminCustomers } from './pages/AdminCustomers';
 import { AdminVercelLogs } from './pages/AdminVercelLogs';
+import { Atendimento } from './pages/Atendimento';
 import { SiteFooter } from './components/SiteFooter';
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
               <Route path="/simulador" element={<Simulator />} />
               <Route path="/login" element={<AuthPage mode="login" />} />
               <Route path="/cadastro" element={<AuthPage mode="register" />} />
+              <Route path="/atendimento" element={<Atendimento />} />
               <Route path="/checkout" element={<Protected role="CUSTOMER"><Checkout /></Protected>} />
               <Route path="/confirmacao" element={<Protected role="CUSTOMER"><Confirmation /></Protected>} />
               <Route path="/app" element={<Protected role="CUSTOMER"><CustomerDashboard /></Protected>} />

@@ -3,6 +3,7 @@ import { Check, Diamond } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api, money } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
+import { homePath } from '../auth/roles';
 import { PublicHeader } from '../components/PublicHeader';
 
 export type Plan = {
@@ -39,7 +40,7 @@ export function Plans() {
   function choose(plan: Plan) {
     sessionStorage.setItem('selected_plan', JSON.stringify(plan));
     if (user?.role === 'CUSTOMER') navigate('/checkout');
-    else if (user?.role === 'ADMIN') navigate('/admin');
+    else if (user) navigate(homePath(user.role));
     else navigate('/cadastro');
   }
 

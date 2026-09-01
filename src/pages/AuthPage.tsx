@@ -2,6 +2,7 @@ import { FormEvent, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { PublicHeader } from '../components/PublicHeader';
 import { useAuth } from '../auth/AuthContext';
+import { homePath } from '../auth/roles';
 
 const BRAZIL_STATES = [
   { uf: 'AC', name: 'Acre' }, { uf: 'AL', name: 'Alagoas' }, { uf: 'AP', name: 'Amapá' },
@@ -45,9 +46,8 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
   });
 
   if (!loading && user) {
-    if (user.role === 'ADMIN') return <Navigate to="/admin" replace />;
-    if (sessionStorage.getItem('selected_plan')) return <Navigate to="/checkout" replace />;
-    return <Navigate to="/app" replace />;
+    if (user.role === 'CUSTOMER' && sessionStorage.getItem('selected_plan')) return <Navigate to="/checkout" replace />;
+    return <Navigate to={homePath(user.role)} replace />;
   }
 
   async function submit(e: FormEvent) {
@@ -65,9 +65,8 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             email: form.email,
             password: form.password,
           });
-      if (signedIn.role === 'ADMIN') navigate('/admin');
-      else if (sessionStorage.getItem('selected_plan')) navigate('/checkout');
-      else navigate('/app');
+      if (signedIn.role === 'CUSTOMER' && sessionStorage.getItem('selected_plan')) navigate('/checkout');
+      else navigate(homePath(signedIn.role));
     } catch (err) {
       setError((err as Error).message);
     }

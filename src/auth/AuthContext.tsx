@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { api } from '../api/client';
+import { AppRole } from './roles';
 
 export type User = {
   id: string;
@@ -9,7 +10,7 @@ export type User = {
   city?: string;
   state?: string;
   document?: string;
-  role: 'CUSTOMER' | 'ADMIN';
+  role: AppRole;
 };
 
 type RegisterInput = {
