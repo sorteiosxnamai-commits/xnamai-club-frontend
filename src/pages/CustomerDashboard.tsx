@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CalendarDays, CheckCircle2, CreditCard, ReceiptText } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { api, money } from '../api/client';
 import { PublicHeader } from '../components/PublicHeader';
 
@@ -14,8 +15,10 @@ type Invoice = {
 
 type Dashboard = {
   subscription: {
+    id?: string;
     status?: string;
     currentPeriodEnd?: string;
+    cancelledAt?: string | null;
     plan?: { name?: string; monthlyPriceCents?: number | null };
   } | null;
   paymentMethod: {
@@ -26,23 +29,74 @@ type Dashboard = {
   invoices: Invoice[];
 };
 
-const statusLabel: Record<string, string> = {
+const invoiceStatusLabel: Record<string, string> = {
   PAID: 'Pago',
   PENDING: 'Pendente',
   FAILED: 'Falhou',
   CANCELLED: 'Cancelado',
 };
 
+const subscriptionStatusLabel: Record<string, string> = {
+  PENDING: 'Pendente',
+  ACTIVE: 'Ativa',
+  PAYMENT_FAILED: 'Pagamento recusado',
+  PAST_DUE: 'Em atraso',
+  SUSPENDED: 'Suspensa',
+  CANCELLED: 'Cancelada',
+};
+
+function formatDate(value?: string | null) {
+  if (!value) return '—';
+  return new Date(value).toLocaleDateString('pt-BR');
+}
+
 export function CustomerDashboard() {
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function loadDashboard() {
+    const dashboard = await api<Dashboard>('/me/dashboard');
+    setData(dashboard);
+  }
 
   useEffect(() => {
-    api<Dashboard>('/me/dashboard').then(setData).catch((e) => setError(e.message));
+    loadDashboard().catch((e) => setError(e.message));
   }, []);
 
   const invoices = data?.invoices ?? [];
   const planName = data?.subscription?.plan?.name || 'XNaMai Club';
+  const subscription = data?.subscription;
+  const isCancelled = subscription?.status === 'CANCELLED';
+  const cancelScheduled = Boolean(subscription?.cancelledAt) && !isCancelled;
+  const canCancel = Boolean(subscription?.id) && !isCancelled && !cancelScheduled;
+  const accessUntil = formatDate(subscription?.currentPeriodEnd);
+  const statusText = cancelScheduled
+    ? 'Cancelamento agendado'
+    : subscriptionStatusLabel[subscription?.status || ''] || subscription?.status || '—';
+
+  async function cancelSubscription() {
+    if (!subscription?.id || busy) return;
+    setBusy(true);
+    setError('');
+    setSuccess('');
+    try {
+      await api(`/subscriptions/${subscription.id}/cancel`, { method: 'POST' });
+      setConfirming(false);
+      await loadDashboard();
+      setSuccess(
+        subscription.currentPeriodEnd
+          ? `Cancelamento confirmado. Você continua com acesso até ${accessUntil} e não haverá novas cobranças.`
+          : 'Cancelamento confirmado. Não haverá novas cobranças.',
+      );
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
     <>
@@ -52,17 +106,23 @@ export function CustomerDashboard() {
           <h1>Área do cliente</h1>
           <p>Acompanhe sua assinatura e cobranças do XNaMai Club.</p>
         </div>
-        {error && <div className="error-box">{error} — escolha um plano e conclua a assinatura para popular esta tela.</div>}
+        {error && (
+          <div className="error-box">
+            {error}
+            {!data && ' — escolha um plano e conclua a assinatura para popular esta tela.'}
+          </div>
+        )}
+        {success && <div className="success-box">{success}</div>}
         {data && (
           <>
             <section className="customer-top">
               <div className="panel current-plan">
                 <div>
                   <small>PLANO ATUAL</small>
-                  <h2>{data.subscription?.plan?.name || 'Sem plano'}</h2>
-                  <div className="big-number">{money(data.subscription?.plan?.monthlyPriceCents)}<small>/mês</small></div>
+                  <h2>{subscription?.plan?.name || 'Sem plano'}</h2>
+                  <div className="big-number">{money(subscription?.plan?.monthlyPriceCents)}<small>/mês</small></div>
                 </div>
-                <div className="status-line"><CheckCircle2 /><span>Status</span><b>{data.subscription?.status}</b></div>
+                <div className="status-line"><CheckCircle2 /><span>Status</span><b>{statusText}</b></div>
                 <div className="status-line">
                   <CreditCard />
                   <span>Pagamento</span>
@@ -72,19 +132,55 @@ export function CustomerDashboard() {
                       : 'PIX recorrente'}
                   </b>
                 </div>
+                {subscription?.id && (
+                  <div className="plan-actions">
+                    {canCancel && !confirming && (
+                      <button className="btn danger" type="button" onClick={() => setConfirming(true)}>
+                        Cancelar assinatura
+                      </button>
+                    )}
+                    {canCancel && confirming && (
+                      <>
+                        <p>
+                          Tem certeza? O acesso aos preços do Club permanece até {accessUntil}.
+                          Depois disso a assinatura encerra e não haverá novas cobranças.
+                        </p>
+                        <div className="cancel-confirm">
+                          <button className="btn ghost" type="button" disabled={busy} onClick={() => setConfirming(false)}>
+                            Manter assinatura
+                          </button>
+                          <button className="btn danger" type="button" disabled={busy} onClick={cancelSubscription}>
+                            {busy ? 'Cancelando…' : 'Confirmar cancelamento'}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    {cancelScheduled && (
+                      <p>
+                        Cancelamento solicitado. Você continua com acesso até <strong>{accessUntil}</strong> e não haverá novas cobranças.
+                      </p>
+                    )}
+                    {isCancelled && (
+                      <>
+                        <p>Assinatura cancelada. O acesso aos preços exclusivos do Club foi encerrado.</p>
+                        <Link className="btn primary" to="/planos">Assinar novamente</Link>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="metric-card">
                 <CheckCircle2 />
                 <span>Status da assinatura</span>
-                <strong>{data.subscription?.status || '—'}</strong>
+                <strong>{statusText}</strong>
               </div>
               <div className="metric-card">
                 <CalendarDays />
-                <span>Próxima cobrança</span>
+                <span>{isCancelled ? 'Encerrada em' : cancelScheduled ? 'Acesso até' : 'Próxima cobrança'}</span>
                 <strong>
-                  {data.subscription?.currentPeriodEnd
-                    ? new Date(data.subscription.currentPeriodEnd).toLocaleDateString('pt-BR')
-                    : '—'}
+                  {isCancelled
+                    ? formatDate(subscription?.cancelledAt)
+                    : accessUntil}
                 </strong>
               </div>
             </section>
@@ -107,11 +203,11 @@ export function CustomerDashboard() {
                   )}
                   {invoices.map((inv) => (
                     <tr key={inv.id}>
-                      <td>{new Date(inv.paidAt || inv.createdAt).toLocaleDateString('pt-BR')}</td>
+                      <td>{formatDate(inv.paidAt || inv.createdAt)}</td>
                       <td>Mensalidade {inv.subscription?.plan?.name || planName}</td>
                       <td>
                         <span className={`badge ${inv.status === 'PAID' ? 'success' : 'danger'}`}>
-                          {statusLabel[inv.status] || inv.status}
+                          {invoiceStatusLabel[inv.status] || inv.status}
                         </span>
                       </td>
                       <td>{money(inv.amountCents)}</td>
