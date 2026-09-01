@@ -15,29 +15,35 @@ import { AdminSubscriptions } from './pages/AdminSubscriptions';
 import { AdminPayments } from './pages/AdminPayments';
 import { AdminCustomers } from './pages/AdminCustomers';
 import { AdminVercelLogs } from './pages/AdminVercelLogs';
+import { SiteFooter } from './components/SiteFooter';
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/planos" element={<Plans />} />
-          <Route path="/regras" element={<Rules />} />
-          <Route path="/simulador" element={<Simulator />} />
-          <Route path="/login" element={<AuthPage mode="login" />} />
-          <Route path="/cadastro" element={<AuthPage mode="register" />} />
-          <Route path="/checkout" element={<Protected role="CUSTOMER"><Checkout /></Protected>} />
-          <Route path="/confirmacao" element={<Protected role="CUSTOMER"><Confirmation /></Protected>} />
-          <Route path="/app" element={<Protected role="CUSTOMER"><CustomerDashboard /></Protected>} />
-          <Route path="/admin" element={<Protected role="ADMIN"><AdminShell /></Protected>}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="assinaturas" element={<AdminSubscriptions />} />
-            <Route path="cobrancas" element={<AdminPayments />} />
-            <Route path="clientes" element={<AdminCustomers />} />
-            <Route path="logs" element={<AdminVercelLogs />} />
-          </Route>
-        </Routes>
+        <div className="app-shell">
+          <div className="app-shell-main">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/planos" element={<Plans />} />
+              <Route path="/regras" element={<Rules />} />
+              <Route path="/simulador" element={<Simulator />} />
+              <Route path="/login" element={<AuthPage mode="login" />} />
+              <Route path="/cadastro" element={<AuthPage mode="register" />} />
+              <Route path="/checkout" element={<Protected role="CUSTOMER"><Checkout /></Protected>} />
+              <Route path="/confirmacao" element={<Protected role="CUSTOMER"><Confirmation /></Protected>} />
+              <Route path="/app" element={<Protected role="CUSTOMER"><CustomerDashboard /></Protected>} />
+              <Route path="/admin" element={<Protected role="ADMIN"><AdminShell /></Protected>}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="assinaturas" element={<AdminSubscriptions />} />
+                <Route path="cobrancas" element={<AdminPayments />} />
+                <Route path="clientes" element={<AdminCustomers />} />
+                <Route path="logs" element={<AdminVercelLogs />} />
+              </Route>
+            </Routes>
+          </div>
+          <SiteFooter />
+        </div>
       </AuthProvider>
     </BrowserRouter>
   );
