@@ -30,3 +30,134 @@
 .cashback-check input{width:18px;height:18px;accent-color:#1c74ff}
 .cashback-check.used{color:#85dbab;cursor:default}
 .cashback-check input:disabled{cursor:not-allowed}
+
+.brand-link{flex-shrink:0;display:flex;align-items:center}
+.menu-toggle,.nav-drawer-actions,.nav-scrim{display:none}
+body.nav-locked{overflow:hidden}
+
+@media(max-width:1080px){
+  .topbar{
+    height:calc(64px + env(safe-area-inset-top, 0px));
+    min-height:calc(64px + env(safe-area-inset-top, 0px));
+    flex-wrap:nowrap;
+    gap:12px;
+    padding:env(safe-area-inset-top, 0px) 16px 0;
+  }
+  .brand{font-size:26px;letter-spacing:-1.2px}
+  .header-actions{display:none}
+  .menu-toggle{
+    display:grid;
+    place-items:center;
+    width:44px;
+    height:44px;
+    margin-left:auto;
+    border:1px solid #1c2d48;
+    background:#091321;
+    color:#fff;
+    border-radius:10px;
+    cursor:pointer;
+    flex-shrink:0;
+    z-index:22;
+  }
+  .nav-links{
+    display:none;
+    position:absolute;
+    top:100%;
+    left:0;
+    right:0;
+    z-index:21;
+    order:unset;
+    width:auto;
+    margin:0;
+    flex-direction:column;
+    align-items:stretch;
+    gap:0;
+    padding:8px 16px 24px;
+    background:#030813f5;
+    backdrop-filter:blur(16px);
+    border-bottom:1px solid #ffffff16;
+    max-height:calc(100dvh - 64px - env(safe-area-inset-top, 0px));
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .topbar.menu-open .nav-links{display:flex}
+  .nav-links a{
+    padding:14px 8px;
+    border-bottom:1px solid #ffffff14;
+    font-size:16px;
+  }
+  .nav-links a.active{border-bottom-color:var(--blue)}
+  .nav-drawer-actions{display:grid;gap:10px;margin-top:16px}
+  .nav-scrim{
+    display:block;
+    position:fixed;
+    inset:0;
+    top:calc(64px + env(safe-area-inset-top, 0px));
+    border:0;
+    padding:0;
+    background:#0008;
+    z-index:18;
+  }
+}
+
+@media(max-width:760px){
+  html,body{overflow-x:clip}
+  .public-page,.checkout-page,.dashboard-page,.confirmation,.rules-page{
+    width:min(1480px,100%);
+    padding-left:16px;
+    padding-right:16px;
+  }
+  .public-page{padding-top:24px;padding-bottom:40px}
+  .site-footer{padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
+  .hero-simple{min-height:0;padding:12px 0 28px}
+  .hero-simple h1{font-size:clamp(28px,8vw,36px);letter-spacing:-1px;margin-bottom:16px}
+  .hero-simple p{font-size:16px;line-height:1.55}
+  .hero-buttons{flex-direction:column;width:100%;margin-top:18px}
+  .hero-buttons .btn{width:100%;min-height:48px}
+  .center-title{font-size:clamp(32px,10vw,42px);letter-spacing:-1px}
+  .center-subtitle{font-size:15px;padding:0 8px}
+  .plans-grid{margin-top:28px;padding-top:12px}
+  .plan-card{padding:24px 18px;min-height:0}
+  .plan-card.featured{transform:none}
+  .price-now{font-size:30px}
+  .sim-heading h1{font-size:clamp(24px,7vw,30px)}
+  .sim-input,.sim-result{padding:20px 16px}
+  .money-input{font-size:22px;padding:14px}
+  .sim-input input[type=range]{margin:24px 0 8px;min-height:44px}
+  .slider-labels{font-size:10px;gap:4px}
+  .result-range{font-size:clamp(20px,6vw,28px);line-height:1.25}
+  .avg-box strong{font-size:24px}
+  .annual-grid strong{font-size:15px}
+  .auth-page{padding:20px 16px 32px;align-items:start}
+  .auth-card{width:100%;padding:22px 16px}
+  .auth-card h1{font-size:24px}
+  .two-cols{grid-template-columns:1fr}
+  .auth-card input,.auth-card select,.desk-search input,.payment-form input{font-size:16px}
+  .checkout-page{padding:20px 16px 40px}
+  .checkout-page>h1{font-size:clamp(24px,7vw,30px)}
+  .checkout-page>p{font-size:14px}
+  .steps{flex-wrap:wrap;gap:8px 10px;justify-content:center;overflow:visible;font-size:12px}
+  .plan-summary,.checkout-main,.order-summary{padding:18px 16px}
+  .checkout-actions{flex-direction:column-reverse;gap:10px}
+  .checkout-actions .btn{width:100%;min-height:48px}
+  .confirmation{padding:20px 16px 40px}
+  .confirmation h1{font-size:clamp(24px,7vw,32px);text-align:center}
+  .confirmation>p{text-align:center;padding:0 4px}
+  .confirmation-card{padding:20px 16px}
+  .dashboard-page{padding:24px 16px 40px}
+  .dashboard-heading h1{font-size:clamp(24px,7vw,32px)}
+  .table-panel{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .table-panel table{min-width:520px}
+  .admin-header{flex-wrap:wrap;gap:10px;align-items:flex-start}
+  .admin-header h1{font-size:24px}
+  .admin-chip{font-size:12px}
+  .cancel-confirm .btn{width:100%}
+  .plan-actions .btn{width:100%}
+  .btn{min-height:44px}
+  .value-card{padding:18px}
+}
+
+@media(max-width:420px){
+  .recommended{font-size:11px;padding:7px 12px}
+  .slider-labels span:nth-child(2),.slider-labels span:nth-child(3){display:none}
+}

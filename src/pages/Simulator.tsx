@@ -13,7 +13,7 @@ export function Simulator() {
     <main className="public-page simulator-page">
       <section className="sim-heading">
         <div className="sim-icon"><Calculator/></div>
-        <div><div className="eyebrow">XNaMai Club › Simulador de economia</div><h1>Descubra quanto sua empresa<br/>pode economizar com o XNaMai Club</h1><p>Faixa média estimada entre 15% e 25% em compras elegíveis.</p></div>
+        <div><div className="eyebrow">XNaMai Club › Simulador de economia</div><h1>Descubra quanto sua empresa pode economizar com o XNaMai Club</h1><p>Faixa média estimada entre 15% e 25% em compras elegíveis.</p></div>
       </section>
       <section className="sim-layout">
         <div className="panel sim-input">
