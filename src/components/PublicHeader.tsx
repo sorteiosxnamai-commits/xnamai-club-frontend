@@ -13,6 +13,7 @@ export function PublicHeader() {
         <NavLink to="/planos">Planos</NavLink>
         <NavLink to="/regras">Regras</NavLink>
         <NavLink to="/simulador">Simulador</NavLink>
+        <a href="https://xnamai.meuspedidos.com.br/" target="_blank" rel="noopener noreferrer">Catálogo</a>
         {user?.role === 'CUSTOMER' && <NavLink to="/app">Minha conta</NavLink>}
         {user?.role === 'ADMIN' && <NavLink to="/admin">Admin</NavLink>}
       </nav>
