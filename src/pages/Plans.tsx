@@ -5,6 +5,7 @@ import { api, money } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { homePath } from '../auth/roles';
 import { PublicHeader } from '../components/PublicHeader';
+import { logAppEvent } from '../telemetry';
 
 export type Plan = {
   id: string;
@@ -39,6 +40,7 @@ export function Plans() {
 
   function choose(plan: Plan) {
     sessionStorage.setItem('selected_plan', JSON.stringify(plan));
+    logAppEvent('Plano escolhido', { plan: plan.name || plan.code || 'lancamento' });
     if (user?.role === 'CUSTOMER') navigate('/checkout');
     else if (user) navigate(homePath(user.role));
     else navigate('/cadastro');

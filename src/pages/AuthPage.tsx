@@ -4,6 +4,7 @@ import { PublicHeader } from '../components/PublicHeader';
 import { useAuth } from '../auth/AuthContext';
 import { homePath } from '../auth/roles';
 import { ApiRequestError } from '../api/client';
+import { logAppEvent } from '../telemetry';
 
 const BRAZIL_STATES = [
   { uf: 'AC', name: 'Acre' }, { uf: 'AL', name: 'Alagoas' }, { uf: 'AP', name: 'Amapá' },
@@ -122,8 +123,10 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
     if (mode === 'login' && !form.password) nextFields.password = 'Informe a senha.';
 
     if (Object.keys(nextFields).length) {
+      const reason = Object.values(nextFields)[0] || 'Confira os campos destacados e tente novamente.';
       setFieldErrors(nextFields);
-      setError(Object.values(nextFields)[0] || 'Confira os campos destacados e tente novamente.');
+      setError(reason);
+      logAppEvent(mode === 'login' ? 'Login recusado' : 'Cadastro recusado', { reason: reason.slice(0, 180) });
       return;
     }
 
@@ -141,12 +144,16 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             email: form.email,
             password: form.password,
           });
+      logAppEvent(mode === 'login' ? 'Login concluido' : 'Cadastro concluido', { role: signedIn.role });
       if (signedIn.role === 'CUSTOMER' && sessionStorage.getItem('selected_plan')) navigate('/checkout');
       else navigate(homePath(signedIn.role));
     } catch (err) {
       const requestError = err instanceof ApiRequestError ? err : new ApiRequestError((err as Error).message);
       setFieldErrors(requestError.fields);
       setError(requestError.message || 'Não foi possível concluir. Tente novamente.');
+      logAppEvent(mode === 'login' ? 'Login falhou' : 'Cadastro falhou', {
+        reason: (requestError.message || 'erro').slice(0, 180),
+      });
       setBusy(false);
     }
   }

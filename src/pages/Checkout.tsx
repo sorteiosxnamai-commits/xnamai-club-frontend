@@ -3,6 +3,7 @@ import { CreditCard, QrCode, ShieldCheck } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { api, money } from '../api/client';
 import { PublicHeader } from '../components/PublicHeader';
+import { logAppEvent } from '../telemetry';
 import { Plan, PlanPrice } from './Plans';
 
 type PaymentMethodChoice = 'CREDIT_CARD' | 'PIX_RECURRING';
@@ -46,9 +47,12 @@ export function Checkout() {
         method: 'POST',
         body: JSON.stringify({ planId: selectedPlan.id, paymentMethodType: method }),
       });
+      logAppEvent('Checkout Stripe', { method });
       window.location.href = result.url;
     } catch (e) {
-      setError((e as Error).message);
+      const message = (e as Error).message;
+      setError(message);
+      logAppEvent('Checkout falhou', { reason: message.slice(0, 180), method });
       setBusy(false);
     }
   }

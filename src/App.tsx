@@ -17,11 +17,13 @@ import { AdminCustomers } from './pages/AdminCustomers';
 import { AdminVercelLogs } from './pages/AdminVercelLogs';
 import { Atendimento } from './pages/Atendimento';
 import { SiteFooter } from './components/SiteFooter';
+import { VercelTelemetry } from './components/VercelTelemetry';
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <VercelTelemetry />
         <div className="app-shell">
           <div className="app-shell-main">
             <Routes>
