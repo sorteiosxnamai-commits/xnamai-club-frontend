@@ -94,6 +94,7 @@ export function Atendimento() {
   const [query, setQuery] = useState('');
   const [savingId, setSavingId] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [tab, setTab] = useState<'joined' | 'unsigned'>('joined');
 
   async function loadMembers() {
     const payload = await api<DeskPayload>('/atendimento/members');
@@ -189,8 +190,12 @@ export function Atendimento() {
         </header>
 
         <section className="kpi-grid forecast-kpis">
-          <div className="kpi"><div><span>Aderiram</span><strong>{data ? data.joined.length : copy.dash}</strong></div></div>
-          <div className="kpi"><div><span>Sem assinatura</span><strong>{data ? data.unsigned.length : copy.dash}</strong></div></div>
+          <button type="button" className={`kpi desk-kpi${tab === 'joined' ? ' selected' : ''}`} onClick={() => setTab('joined')}>
+            <div><span>Aderiram</span><strong>{data ? data.joined.length : copy.dash}</strong></div>
+          </button>
+          <button type="button" className={`kpi desk-kpi${tab === 'unsigned' ? ' selected' : ''}`} onClick={() => setTab('unsigned')}>
+            <div><span>Sem assinatura</span><strong>{data ? data.unsigned.length : copy.dash}</strong></div>
+          </button>
           <div className="kpi positive"><div><span>{copy.available}</span><strong>{data ? available : copy.dash}</strong></div></div>
           <div className="kpi"><div><span>Cashback utilizado</span><strong>{data ? used : copy.dash}</strong></div></div>
         </section>
@@ -207,41 +212,30 @@ export function Atendimento() {
         {error && <div className="error-box" role="alert">{error}</div>}
         {!data && !error && <p className="admin-loading">{copy.loading}</p>}
         {data && (
-          <>
-            <section className="panel table-panel">
-              <div className="section-title"><h2>{copy.unsignedTitle}</h2></div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Cliente</th>
-                    <th>Empresa</th>
-                    <th>Cadastro</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {unsigned.length === 0 && (
-                    <tr>
-                      <td colSpan={4}>{data.unsigned.length === 0 ? copy.unsignedEmpty : copy.noSearch}</td>
-                    </tr>
-                  )}
-                  {unsigned.map((row) => (
-                    <tr key={row.id}>
-                      <CustomerCells row={row} dash={copy.dash} />
-                      <td>{formatDate(row.createdAt)}</td>
-                      <td>
-                        {row.subscription?.status === 'PENDING'
-                          ? <StatusBadge status="PENDING" labels={subscriptionStatusLabel} />
-                          : <span className="badge pending">Sem assinatura</span>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </section>
-
-            <section className="panel table-panel">
-              <div className="section-title"><h2>{copy.joinedTitle}</h2></div>
+          <section className="panel table-panel">
+            <div className="desk-tabs" role="tablist" aria-label="Listas de atendimento">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === 'joined'}
+                className={tab === 'joined' ? 'active' : ''}
+                onClick={() => setTab('joined')}
+              >
+                {copy.joinedTitle}
+                <small>{data.joined.length}</small>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === 'unsigned'}
+                className={tab === 'unsigned' ? 'active' : ''}
+                onClick={() => setTab('unsigned')}
+              >
+                {copy.unsignedTitle}
+                <small>{data.unsigned.length}</small>
+              </button>
+            </div>
+            {tab === 'joined' ? (
               <table>
                 <thead>
                   <tr>
@@ -298,8 +292,37 @@ export function Atendimento() {
                   ))}
                 </tbody>
               </table>
-            </section>
-          </>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Empresa</th>
+                    <th>Cadastro</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {unsigned.length === 0 && (
+                    <tr>
+                      <td colSpan={4}>{data.unsigned.length === 0 ? copy.unsignedEmpty : copy.noSearch}</td>
+                    </tr>
+                  )}
+                  {unsigned.map((row) => (
+                    <tr key={row.id}>
+                      <CustomerCells row={row} dash={copy.dash} />
+                      <td>{formatDate(row.createdAt)}</td>
+                      <td>
+                        {row.subscription?.status === 'PENDING'
+                          ? <StatusBadge status="PENDING" labels={subscriptionStatusLabel} />
+                          : <span className="badge pending">Sem assinatura</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </section>
         )}
       </main>
     </>

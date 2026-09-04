@@ -25,7 +25,13 @@
 .desk-search{display:grid;gap:8px;margin:18px 0 8px;color:#dfe8f5;font-size:13px;font-weight:700;max-width:520px}
 .desk-search input{padding:13px;border-radius:8px;border:1px solid #2a3b59;background:#07101d;color:#fff;outline:none;font-weight:500}
 .desk-search input:focus{border-color:#2178ff}
-.desk-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.desk-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.desk-tabs button{border:1px solid #28405f;background:#091324;color:#b7c4d7;padding:12px 14px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.desk-tabs button small{border:1px solid #2a4d7a;border-radius:999px;padding:2px 8px;font-size:12px;color:#d7e6ff}
+.desk-tabs button.active{border-color:#217cff;color:#fff;background:#0c1c33}
+.desk-tabs button.active small{border-color:#217cff;background:#1264dd}
+.kpi.desk-kpi{width:100%;text-align:left;cursor:pointer;color:inherit;font:inherit}
+.kpi.desk-kpi.selected{border-color:#217cff;box-shadow:0 0 0 1px #217cff inset}
 .cashback-check{display:flex;align-items:center;gap:8px;cursor:pointer;color:#dfe8f5;font-size:13px}
 .cashback-check input{width:18px;height:18px;accent-color:#1c74ff}
 .cashback-check.used{color:#85dbab;cursor:default}
@@ -169,4 +175,7 @@ body.nav-locked{overflow:hidden}
 
 .kpi-grid.forecast-kpis{grid-template-columns:repeat(4,1fr)}
 @media(max-width:1100px){.kpi-grid.forecast-kpis{grid-template-columns:1fr 1fr}}
-@media(max-width:760px){.kpi-grid.forecast-kpis{grid-template-columns:1fr}}
+@media(max-width:760px){
+  .kpi-grid.forecast-kpis{grid-template-columns:1fr}
+  .desk-tabs button{font-size:13px;padding:10px 8px;flex-wrap:wrap}
+}
