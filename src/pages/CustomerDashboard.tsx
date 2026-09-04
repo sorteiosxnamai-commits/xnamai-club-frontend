@@ -107,9 +107,8 @@ export function CustomerDashboard() {
           <p>Acompanhe sua assinatura e cobranças do XNaMai Club.</p>
         </div>
         {error && (
-          <div className="error-box">
+          <div className="error-box" role="alert">
             {error}
-            {!data && ' — escolha um plano e conclua a assinatura para popular esta tela.'}
           </div>
         )}
         {success && <div className="success-box">{success}</div>}

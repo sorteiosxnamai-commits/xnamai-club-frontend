@@ -118,7 +118,7 @@ export function Checkout() {
                     e agenda as próximas no mesmo dia do mês.
                   </p>
                 )}
-                {error && <div className="error-box">{error}</div>}
+                {error && <div className="error-box" role="alert">{error}</div>}
                 <div className="checkout-actions">
                   <button type="button" className="btn ghost" onClick={() => setStep(2)}>Voltar</button>
                   <button type="button" className="btn primary large" onClick={finish} disabled={busy}>

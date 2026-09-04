@@ -157,6 +157,11 @@ body.nav-locked{overflow:hidden}
   .value-card{padding:18px}
 }
 
+.field-error{color:#ffb7b7;font-size:12px;font-weight:600;margin-top:4px}
+.field-hint{color:#8da0bf;font-size:12px;font-weight:500;margin-top:4px}
+.auth-card input.invalid,.auth-card select.invalid{border-color:#8d3232}
+.error-box{font-weight:600}
+
 @media(max-width:420px){
   .recommended{font-size:11px;padding:7px 12px}
   .slider-labels span:nth-child(2),.slider-labels span:nth-child(3){display:none}

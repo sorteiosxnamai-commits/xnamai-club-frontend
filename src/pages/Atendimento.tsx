@@ -158,7 +158,7 @@ export function Atendimento() {
           />
         </label>
 
-        {error && <div className="error-box">{error}</div>}
+        {error && <div className="error-box" role="alert">{error}</div>}
         {!rows && !error && <p className="admin-loading">{copy.loading}</p>}
         {rows && (
           <section className="panel table-panel">

@@ -50,7 +50,7 @@ export function Plans() {
       <div className="eyebrow">👑 OFERTA DE LANÇAMENTO</div>
       <h1 className="center-title"><span>XNaMai</span> Club</h1>
       <p className="center-subtitle">Um plano só no lançamento: de R$ 299,97 por R$ 149,97/mês.</p>
-      {error && <div className="error-box">{error}. Inicie o backend para carregar os planos reais.</div>}
+      {error && <div className="error-box" role="alert">{error}</div>}
       <div className="plans-grid">
         {plans.map((plan) => (
           <article className="plan-card featured" key={plan.id}>
