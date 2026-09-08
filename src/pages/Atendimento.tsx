@@ -96,8 +96,8 @@ export function Atendimento() {
   const [refreshing, setRefreshing] = useState(false);
   const [tab, setTab] = useState<'joined' | 'unsigned'>('joined');
 
-  async function loadMembers() {
-    const payload = await api<DeskPayload>('/atendimento/members');
+  async function loadMembers(refresh = false) {
+    const payload = await api<DeskPayload>(`/atendimento/members${refresh ? '?refresh=1' : ''}`);
     setError('');
     setData({
       joined: payload.joined ?? [],
@@ -119,8 +119,8 @@ export function Atendimento() {
         }
       } catch (e) {
         if (cancelled) return;
-        if (attempt < 4) {
-          setTimeout(() => { void load(attempt + 1); }, 1200 * attempt);
+        if (attempt < 2) {
+          setTimeout(() => { void load(attempt + 1); }, 800);
           return;
         }
         setError((e as Error).message);
@@ -181,7 +181,7 @@ export function Atendimento() {
               disabled={refreshing}
               onClick={() => {
                 setRefreshing(true);
-                loadMembers().catch((e) => setError((e as Error).message)).finally(() => setRefreshing(false));
+                loadMembers(true).catch((e) => setError((e as Error).message)).finally(() => setRefreshing(false));
               }}
             >
               <RefreshCw size={16} /> {refreshing ? 'Atualizando\u2026' : 'Atualizar'}
