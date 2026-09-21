@@ -41,12 +41,29 @@ function formatDocument(value?: string | null) {
   return value;
 }
 
+function normalizeText(value: string) {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function onlyDigits(value?: string | null) {
+  return (value ?? '').replace(/\D/g, '');
+}
+
+// Consulta documental: somente digitos e caracteres de mascara (. - / ( ) + espaco).
+const documentQuery = /^[\d.\-/()+\s]+$/;
+
 function matchesQuery(row: DeskMember, term: string) {
   if (!term) return true;
-  const haystack = [
+  const haystack = normalizeText([
     row.name, row.email, row.companyName, row.document, row.phone, row.city, row.state,
-  ].join(' ').toLowerCase();
-  return haystack.includes(term);
+  ].join(' '));
+  if (haystack.includes(normalizeText(term))) return true;
+
+  const digits = onlyDigits(term);
+  if (digits && documentQuery.test(term)) {
+    return onlyDigits(row.document).includes(digits) || onlyDigits(row.phone).includes(digits);
+  }
+  return false;
 }
 
 function CustomerCells({ row, dash }: { row: DeskMember; dash: string }) {
@@ -130,7 +147,7 @@ export function Atendimento() {
     return () => { cancelled = true; };
   }, []);
 
-  const term = query.trim().toLowerCase();
+  const term = query.trim();
   const joined = useMemo(() => (data?.joined ?? []).filter((row) => matchesQuery(row, term)), [data, term]);
   const unsigned = useMemo(() => (data?.unsigned ?? []).filter((row) => matchesQuery(row, term)), [data, term]);
   const available = data?.joined.filter((row) => row.cashback.eligible && !row.cashback.used).length ?? 0;
@@ -203,9 +220,11 @@ export function Atendimento() {
         <label className="desk-search">
           Buscar cliente
           <input
+            type="search"
+            autoComplete="off"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Nome, e-mail, empresa, CPF/CNPJ ou telefone"
+            placeholder="Digite nome, e-mail, empresa ou qualquer parte do CPF/CNPJ/telefone"
           />
         </label>
 
