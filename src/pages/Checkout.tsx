@@ -82,9 +82,8 @@ export function Checkout() {
             <div className="checkout-price"><PlanPrice plan={plan} /></div>
             <p>{plan.description}</p>
             <ul>
-              <li>✓ Preços diferenciados</li>
               <li>✓ Acesso ao XNaMai Club</li>
-              <li>✓ Ofertas exclusivas</li>
+              <li>✓ Acesso aos preços do clube</li>
             </ul>
           </aside>
           <div className="panel checkout-main">

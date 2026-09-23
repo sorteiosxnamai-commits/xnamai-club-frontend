@@ -62,11 +62,8 @@ export function Plans() {
             <PlanPrice plan={plan} />
             <div className="limit">{plan.description}</div>
             <ul>
-              <li><Check /> Preços diferenciados</li>
               <li><Check /> Acesso ao XNaMai Club</li>
-              <li><Check /> Ofertas exclusivas</li>
-              <li><Check /> Atendimento prioritário</li>
-              <li><Check /> Condições especiais</li>
+              <li><Check /> Acesso aos preços do clube</li>
             </ul>
             <button className="btn primary" onClick={() => choose(plan)}>Assinar plano</button>
           </article>
