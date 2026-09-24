@@ -276,7 +276,7 @@ export function Atendimento() {
                     <tr key={row.id}>
                       <CustomerCells row={row} dash={copy.dash} />
                       <td>
-                        {row.subscription?.plan?.name || 'Sem plano'}
+                        <strong>{row.subscription?.plan?.name || 'Sem plano'}</strong>
                         {row.subscription?.plan?.monthlyPriceCents != null && (
                           <div className="cell-muted">{money(row.subscription.plan.monthlyPriceCents)}{copy.perMonth}</div>
                         )}

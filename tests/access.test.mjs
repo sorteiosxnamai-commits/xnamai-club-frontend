@@ -22,3 +22,9 @@ test('priority plan exposes its benefits and uses the Stripe upgrade flow', () =
   assert.match(plans, /Grupo XNaMai Lab/);
   assert.match(checkout, /api\('\/subscriptions\/upgrade'/);
 });
+
+test('the atendimento table displays each customer plan', () => {
+  const atendimento = readFileSync(new URL('../src/pages/Atendimento.tsx', import.meta.url), 'utf8');
+  assert.match(atendimento, /<th>Plano<\/th>/);
+  assert.match(atendimento, /row\.subscription\?\.plan\?\.name/);
+});
