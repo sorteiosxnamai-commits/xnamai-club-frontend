@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { Protected } from './components/Protected';
+import { ATENDIMENTO_ROLES } from './auth/roles';
 import { AdminShell } from './components/AdminShell';
 import { Home } from './pages/Home';
 import { Plans } from './pages/Plans';
@@ -33,7 +34,7 @@ export default function App() {
               <Route path="/simulador" element={<Simulator />} />
               <Route path="/login" element={<AuthPage mode="login" />} />
               <Route path="/cadastro" element={<AuthPage mode="register" />} />
-              <Route path="/atendimento" element={<Atendimento />} />
+              <Route path="/atendimento" element={<Protected roles={ATENDIMENTO_ROLES}><Atendimento /></Protected>} />
               <Route path="/checkout" element={<Protected role="CUSTOMER"><Checkout /></Protected>} />
               <Route path="/confirmacao" element={<Protected role="CUSTOMER"><Confirmation /></Protected>} />
               <Route path="/app" element={<Protected role="CUSTOMER"><CustomerDashboard /></Protected>} />
