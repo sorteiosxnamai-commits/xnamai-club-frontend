@@ -17,6 +17,19 @@ export type Plan = {
   description: string;
 };
 
+type CurrentSubscription = {
+  status?: string;
+  plan?: { id?: string; code?: string } | null;
+};
+
+export function planBenefits(plan: Plan) {
+  const benefits = ['Acesso ao XNaMai Club', 'Acesso aos preços do clube'];
+  if (plan.code === 'PRIORITY') {
+    benefits.push('Ofertas exclusivas', 'Atendimento prioritário', 'Condições especiais', 'Prioridade nos pedidos');
+  }
+  return benefits;
+}
+
 export function PlanPrice({ plan }: { plan: Plan }) {
   const hasLaunchDeal = plan.compareAtPriceCents != null && plan.monthlyPriceCents != null;
   return (
@@ -33,10 +46,15 @@ export function PlanPrice({ plan }: { plan: Plan }) {
 
 export function Plans() {
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [currentSubscription, setCurrentSubscription] = useState<CurrentSubscription | null>(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { user } = useAuth();
   useEffect(() => { api<Plan[]>('/plans').then(setPlans).catch(e => setError(e.message)); }, []);
+  useEffect(() => {
+    if (user?.role !== 'CUSTOMER') return;
+    api<CurrentSubscription>('/subscriptions/me').then(setCurrentSubscription).catch(() => setCurrentSubscription(null));
+  }, [user]);
 
   function choose(plan: Plan) {
     sessionStorage.setItem('selected_plan', JSON.stringify(plan));
@@ -49,23 +67,34 @@ export function Plans() {
   return <>
     <PublicHeader />
     <main className="public-page plans-page launch-plans">
-      <div className="eyebrow">👑 OFERTA DE LANÇAMENTO</div>
+      <div className="eyebrow">👑 PLANOS XNAMAI CLUB</div>
       <h1 className="center-title"><span>XNaMai</span> Club</h1>
-      <p className="center-subtitle">Um plano só no lançamento: de R$ 299,97 por R$ 149,97/mês.</p>
+      <p className="center-subtitle">Escolha entre o acesso Basic de lançamento e a prioridade nos pedidos.</p>
       {error && <div className="error-box" role="alert">{error}</div>}
       <div className="plans-grid">
         {plans.map((plan) => (
           <article className="plan-card featured" key={plan.id}>
-            <div className="recommended">★ LANÇAMENTO</div>
+            <div className="recommended">{plan.code === 'PRIORITY' ? '★ PRIORIDADE NOS PEDIDOS' : '★ LANÇAMENTO'}</div>
             <div className="plan-icon"><Diamond /></div>
             <h3>{plan.name}</h3>
             <PlanPrice plan={plan} />
             <div className="limit">{plan.description}</div>
             <ul>
-              <li><Check /> Acesso ao XNaMai Club</li>
-              <li><Check /> Acesso aos preços do clube</li>
+              {planBenefits(plan).map((benefit) => <li key={benefit}><Check /> {benefit}</li>)}
             </ul>
-            <button className="btn primary" onClick={() => choose(plan)}>Assinar plano</button>
+            <button
+              className="btn primary"
+              disabled={currentSubscription?.status === 'ACTIVE' && currentSubscription.plan?.id === plan.id}
+              onClick={() => choose(plan)}
+            >
+              {currentSubscription?.status === 'ACTIVE' && currentSubscription.plan?.id === plan.id
+                ? 'Plano atual'
+                : currentSubscription?.status === 'ACTIVE'
+                  && currentSubscription.plan?.code === 'LAUNCH'
+                  && plan.code === 'PRIORITY'
+                    ? 'Fazer upgrade'
+                    : 'Assinar plano'}
+            </button>
           </article>
         ))}
       </div>

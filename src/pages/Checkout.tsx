@@ -1,12 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CreditCard, QrCode, ShieldCheck } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { api, money } from '../api/client';
 import { PublicHeader } from '../components/PublicHeader';
 import { logAppEvent } from '../telemetry';
-import { Plan, PlanPrice } from './Plans';
+import { Plan, PlanPrice, planBenefits } from './Plans';
 
 type PaymentMethodChoice = 'CREDIT_CARD' | 'PIX_RECURRING';
+
+type CurrentSubscription = {
+  id: string;
+  status: string;
+  currentPeriodEnd?: string | null;
+  plan?: { id?: string; code?: string; name?: string } | null;
+};
 
 function addCalendarMonth(from = new Date()) {
   const next = new Date(from);
@@ -19,6 +26,7 @@ function formatDate(date: Date) {
 }
 
 export function Checkout() {
+  const navigate = useNavigate();
   const plan = useMemo(() => {
     try { return JSON.parse(sessionStorage.getItem('selected_plan') || '') as Plan; }
     catch { return null; }
@@ -27,11 +35,21 @@ export function Checkout() {
   const [step, setStep] = useState<2 | 3>(2);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [currentSubscription, setCurrentSubscription] = useState<CurrentSubscription | null | undefined>(undefined);
   const nextCharge = addCalendarMonth();
   const isPix = method === 'PIX_RECURRING';
 
+  useEffect(() => {
+    api<CurrentSubscription>('/subscriptions/me')
+      .then(setCurrentSubscription)
+      .catch(() => setCurrentSubscription(null));
+  }, []);
+
   if (!plan) return <Navigate to="/planos" replace />;
   const selectedPlan = plan;
+  const isUpgrade = currentSubscription?.status === 'ACTIVE'
+    && currentSubscription.plan?.code === 'LAUNCH'
+    && selectedPlan.code === 'PRIORITY';
 
   async function finish() {
     if (busy) return;
@@ -43,6 +61,16 @@ export function Checkout() {
     setError('');
     sessionStorage.setItem('checkout_method', method);
     try {
+      if (isUpgrade) {
+        await api('/subscriptions/upgrade', {
+          method: 'POST',
+          body: JSON.stringify({ planId: selectedPlan.id }),
+        });
+        logAppEvent('Upgrade Stripe', { from: currentSubscription?.plan?.code || 'LAUNCH', to: selectedPlan.code });
+        sessionStorage.removeItem('selected_plan');
+        navigate('/app', { replace: true });
+        return;
+      }
       const result = await api<{ url: string }>('/subscriptions/checkout', {
         method: 'POST',
         body: JSON.stringify({ planId: selectedPlan.id, paymentMethodType: method }),
@@ -63,13 +91,17 @@ export function Checkout() {
       <main className="checkout-page">
         <div className="steps">
           <span className="done">1 Planos ✓</span>
-          <span className={step === 2 ? 'active' : ''}>2 Pré-aprovação</span>
-          <span className={step === 3 ? 'active' : ''}>3 Pagamento</span>
-          <span>4 Confirmação</span>
+          {isUpgrade ? (
+            <><span className="active">2 Confirmar upgrade</span><span>3 Concluído</span></>
+          ) : (
+            <><span className={step === 2 ? 'active' : ''}>2 Pré-aprovação</span><span className={step === 3 ? 'active' : ''}>3 Pagamento</span><span>4 Confirmação</span></>
+          )}
         </div>
-        <h1>{step === 2 ? 'Pré-aprovação da assinatura' : isPix ? 'Pagamento via PIX' : 'Pagamento da assinatura'}</h1>
+        <h1>{isUpgrade ? 'Upgrade para o Plano Prioridade' : step === 2 ? 'Pré-aprovação da assinatura' : isPix ? 'Pagamento via PIX' : 'Pagamento da assinatura'}</h1>
         <p>
-          {step === 2
+          {isUpgrade
+            ? 'A assinatura atual será atualizada na Stripe, sem criar uma segunda assinatura.'
+            : step === 2
             ? 'Escolha como deseja pagar sua assinatura do XNaMai Club.'
             : isPix
               ? `A Stripe exibe o QR Code ou o código PIX. Depois de autorizar o Pix Automático no banco, a cobrança mensal fica no dia ${formatDate(new Date())} — a próxima é ${formatDate(nextCharge)}.`
@@ -82,12 +114,27 @@ export function Checkout() {
             <div className="checkout-price"><PlanPrice plan={plan} /></div>
             <p>{plan.description}</p>
             <ul>
-              <li>✓ Acesso ao XNaMai Club</li>
-              <li>✓ Acesso aos preços do clube</li>
+              {planBenefits(plan).map((benefit) => <li key={benefit}>✓ {benefit}</li>)}
             </ul>
           </aside>
           <div className="panel checkout-main">
-            {step === 2 ? (
+            {currentSubscription === undefined ? (
+              <p>Carregando assinatura atual...</p>
+            ) : isUpgrade ? (
+              <>
+                <h2>Confirmar upgrade</h2>
+                <p>
+                  Seu plano muda de <strong>{currentSubscription?.plan?.name || 'Plano Basic de Lançamento'}</strong> para{' '}
+                  <strong>{selectedPlan.name}</strong>. A Stripe cobrará o ajuste proporcional agora e as próximas mensalidades serão de{' '}
+                  <strong>{money(selectedPlan.monthlyPriceCents)}</strong>.
+                </p>
+                <div className="secure-note"><ShieldCheck /> A forma de pagamento da assinatura atual será mantida.</div>
+                {error && <div className="error-box" role="alert">{error}</div>}
+                <button type="button" className="btn primary large full" onClick={finish} disabled={busy}>
+                  {busy ? 'Atualizando na Stripe...' : 'Confirmar upgrade'}
+                </button>
+              </>
+            ) : step === 2 ? (
               <>
                 <h2>Escolha a forma de pagamento</h2>
                 <button type="button" className={`payment-option ${method === 'CREDIT_CARD' ? 'selected' : ''}`} onClick={() => setMethod('CREDIT_CARD')}>
@@ -138,8 +185,8 @@ export function Checkout() {
               <div><span>De</span><b className="price-was">{money(plan.compareAtPriceCents)}</b></div>
             )}
             <div><span>Mensalidade</span><b>{money(plan.monthlyPriceCents)}</b></div>
-            <div><span>Forma</span><b>{isPix ? 'PIX recorrente' : 'Cartão'}</b></div>
-            <div><span>Próxima cobrança</span><b>{formatDate(nextCharge)}</b></div>
+            <div><span>Forma</span><b>{isUpgrade ? 'Pagamento atual' : isPix ? 'PIX recorrente' : 'Cartão'}</b></div>
+            <div><span>Próxima cobrança</span><b>{formatDate(isUpgrade && currentSubscription?.currentPeriodEnd ? new Date(currentSubscription.currentPeriodEnd) : nextCharge)}</b></div>
             <hr />
             <div className="total"><span>Total mensal</span><b>{money(plan.monthlyPriceCents)}</b></div>
             <div className="secure-note"><ShieldCheck /> Ambiente protegido</div>

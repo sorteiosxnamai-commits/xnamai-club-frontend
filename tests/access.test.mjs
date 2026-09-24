@@ -13,3 +13,11 @@ test('Protected delegates to accessFor (single RBAC decision)', () => {
   const protectedSource = readFileSync(new URL('../src/components/Protected.tsx', import.meta.url), 'utf8');
   assert.match(protectedSource, /accessFor\(user, allowed\)/);
 });
+
+test('priority plan exposes its benefits and uses the Stripe upgrade flow', () => {
+  const plans = readFileSync(new URL('../src/pages/Plans.tsx', import.meta.url), 'utf8');
+  const checkout = readFileSync(new URL('../src/pages/Checkout.tsx', import.meta.url), 'utf8');
+  assert.match(plans, /plan\.code === 'PRIORITY'/);
+  assert.match(plans, /Prioridade nos pedidos/);
+  assert.match(checkout, /api\('\/subscriptions\/upgrade'/);
+});
