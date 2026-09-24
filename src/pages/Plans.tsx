@@ -25,7 +25,7 @@ type CurrentSubscription = {
 export function planBenefits(plan: Plan) {
   const benefits = ['Acesso ao XNaMai Club', 'Acesso aos preços do clube'];
   if (plan.code === 'PRIORITY') {
-    benefits.push('Ofertas exclusivas', 'Atendimento prioritário', 'Condições especiais', 'Prioridade nos pedidos');
+    benefits.push('Grupo XNaMai Lab', 'Ofertas exclusivas', 'Atendimento prioritário', 'Condições especiais', 'Prioridade nos pedidos');
   }
   return benefits;
 }

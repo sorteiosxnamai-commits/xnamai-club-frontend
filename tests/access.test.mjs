@@ -19,5 +19,6 @@ test('priority plan exposes its benefits and uses the Stripe upgrade flow', () =
   const checkout = readFileSync(new URL('../src/pages/Checkout.tsx', import.meta.url), 'utf8');
   assert.match(plans, /plan\.code === 'PRIORITY'/);
   assert.match(plans, /Prioridade nos pedidos/);
+  assert.match(plans, /Grupo XNaMai Lab/);
   assert.match(checkout, /api\('\/subscriptions\/upgrade'/);
 });
