@@ -127,8 +127,8 @@ export function Rules() {
         <h1 className="center-title"><span>Regras</span> do clube</h1>
         <p className="center-subtitle">O XNaMai Club possui dois planos: Basic e Prioridade.</p>
         <section className="rules-fastpass" aria-label="Comparativo de antecedência dos planos">
-          <div><span>BASIC</span><strong>⏱️ 24H</strong><small>antecedência mínima</small></div>
-          <div><span>PRIORIDADE</span><strong>⚡ 6H</strong><small>antecedência mínima</small></div>
+          <div><span>BASIC</span><strong>24H</strong><small>antecedência mínima</small></div>
+          <div><span>PRIORIDADE</span><strong>6H</strong><small>antecedência mínima</small></div>
           <p>O Plano Prioridade é limitado a <strong>50 clientes</strong> para preservar a capacidade operacional de atendimento e separação prioritária.</p>
         </section>
         <ol className="rules-list">

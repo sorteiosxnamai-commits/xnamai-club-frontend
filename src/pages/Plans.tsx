@@ -102,7 +102,7 @@ export function Plans() {
             </div>
             <div className={`plan-speed${priority ? ' fast' : ''}`}>
               <span>{priority ? 'PRIORIDADE' : 'BASIC'}</span>
-              <strong>{priority ? '⚡ 6H' : '⏱️ 24H'}</strong>
+              <strong>{priority ? '6H' : '24H'}</strong>
               <small>antecedência mínima</small>
             </div>
             <ul>

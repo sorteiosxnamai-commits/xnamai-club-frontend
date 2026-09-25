@@ -180,7 +180,7 @@ body.nav-locked{overflow:hidden}
   .desk-tabs button{font-size:13px;padding:10px 8px;flex-wrap:wrap}
 }
 
-.plan-promise{min-height:104px;text-align:center;border-top:1px solid #9aa8bc55;border-bottom:1px solid #9aa8bc55;padding:16px 4px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+.plan-promise{height:140px;text-align:center;border-top:1px solid #9aa8bc55;border-bottom:1px solid #9aa8bc55;padding:16px 4px;display:flex;flex-direction:column;justify-content:center;gap:8px}
 .plan-promise strong{font-size:17px;line-height:1.35}
 .plan-promise p{margin:0;color:#c5d2e5;font-size:13px;line-height:1.5;font-weight:500}
 .plan-speed{margin:16px 0 2px;padding:14px;border:1px solid #31517d;border-radius:14px;background:#08172c;text-align:center;display:grid;gap:2px}
@@ -198,7 +198,7 @@ body.nav-locked{overflow:hidden}
 .plan-card .btn:disabled{cursor:not-allowed;opacity:.58;transform:none;filter:none}
 
 @media(max-width:760px){
-  .plan-promise{min-height:0}
+  .plan-promise{height:auto;min-height:0}
   .plan-speed strong{font-size:32px}
 }
 

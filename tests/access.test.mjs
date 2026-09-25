@@ -39,6 +39,7 @@ test('rules distinguish Basic and Priority without advertising expired cashback'
   assert.match(rules, /Plano Prioridade: R\$ 297,97\/mês/);
   assert.match(rules, /separação e envio no mesmo dia/);
   assert.match(rules, /não garante a aquisição, disponibilidade ou inclusão/);
-  assert.match(rules, /PRIORIDADE[\s\S]*⚡ 6H/);
+  assert.match(rules, /PRIORIDADE[\s\S]*<strong>6H<\/strong>/);
+  assert.doesNotMatch(rules, /⏱️ 24H|⚡ 6H/);
   assert.doesNotMatch(rules, /cashback|entrega no mesmo dia/i);
 });
