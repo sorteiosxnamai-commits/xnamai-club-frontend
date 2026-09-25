@@ -125,6 +125,22 @@ export function CustomerDashboard() {
     }
   }
 
+  async function resumeSubscription() {
+    if (!subscription?.id || busy) return;
+    setBusy(true);
+    setError('');
+    setSuccess('');
+    try {
+      await api(`/subscriptions/${subscription.id}/resume`, { method: 'POST', body: '{}' });
+      await loadDashboard();
+      setSuccess('Assinatura retomada. Você continuará no Plano Basic normalmente.');
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <>
       <PublicHeader />
@@ -169,6 +185,11 @@ export function CustomerDashboard() {
                           : cancelScheduled
                             ? 'Reativar e fazer upgrade para o Plano Prioridade'
                             : 'Fazer upgrade para o Plano Prioridade'}
+                      </button>
+                    )}
+                    {cancelScheduled && (
+                      <button className="btn ghost" type="button" disabled={busy} onClick={resumeSubscription}>
+                        {busy ? 'Retomando…' : 'Continuar no Plano Basic'}
                       </button>
                     )}
                     {canCancel && !confirming && (

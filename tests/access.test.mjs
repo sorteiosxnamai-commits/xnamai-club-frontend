@@ -40,6 +40,12 @@ test('Basic customers can start an upgrade from their dashboard', () => {
   assert.match(dashboard, /sessionStorage\.setItem\('selected_plan'/);
 });
 
+test('customers with scheduled cancellation can resume the Basic plan', () => {
+  const dashboard = readFileSync(new URL('../src/pages/CustomerDashboard.tsx', import.meta.url), 'utf8');
+  assert.match(dashboard, /Continuar no Plano Basic/);
+  assert.match(dashboard, /\/subscriptions\/\$\{subscription\.id\}\/resume/);
+});
+
 test('rules distinguish Basic and Priority without advertising expired cashback', () => {
   const rules = readFileSync(new URL('../src/pages/Rules.tsx', import.meta.url), 'utf8');
   assert.match(rules, /Plano Basic: R\$ 149,97\/mês/);
