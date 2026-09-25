@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CalendarDays, CheckCircle2, CreditCard, ReceiptText } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api, money } from '../api/client';
 import { PublicHeader } from '../components/PublicHeader';
 
@@ -19,7 +19,7 @@ type Dashboard = {
     status?: string;
     currentPeriodEnd?: string;
     cancelledAt?: string | null;
-    plan?: { name?: string; monthlyPriceCents?: number | null };
+    plan?: { id?: string; code?: string; name?: string; monthlyPriceCents?: number | null };
   } | null;
   paymentMethod: {
     type?: string;
@@ -51,6 +51,7 @@ function formatDate(value?: string | null) {
 }
 
 export function CustomerDashboard() {
+  const navigate = useNavigate();
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -72,6 +73,7 @@ export function CustomerDashboard() {
   const isCancelled = subscription?.status === 'CANCELLED';
   const cancelScheduled = Boolean(subscription?.cancelledAt) && !isCancelled;
   const canCancel = Boolean(subscription?.id) && !isCancelled && !cancelScheduled;
+  const canUpgrade = subscription?.status === 'ACTIVE' && subscription.plan?.code === 'LAUNCH';
   const accessUntil = formatDate(subscription?.currentPeriodEnd);
   const statusText = cancelScheduled
     ? 'Cancelamento agendado'
@@ -94,6 +96,31 @@ export function CustomerDashboard() {
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      setBusy(false);
+    }
+  }
+
+  async function startUpgrade() {
+    if (busy) return;
+    setBusy(true);
+    setError('');
+    setSuccess('');
+    try {
+      const plans = await api<Array<{
+        id: string;
+        code: string;
+        name: string;
+        monthlyPriceCents: number | null;
+        compareAtPriceCents?: number | null;
+        purchaseLimitCents: number | null;
+        description: string;
+      }>>('/plans');
+      const priority = plans.find((plan) => plan.code === 'PRIORITY');
+      if (!priority) throw new Error('Plano Prioridade indisponível no momento.');
+      sessionStorage.setItem('selected_plan', JSON.stringify(priority));
+      navigate('/checkout');
+    } catch (e) {
+      setError((e as Error).message);
       setBusy(false);
     }
   }
@@ -135,6 +162,15 @@ export function CustomerDashboard() {
                 </div>
                 {subscription?.id && (
                   <div className="plan-actions">
+                    {canUpgrade && (
+                      <button className="btn primary" type="button" disabled={busy} onClick={startUpgrade}>
+                        {busy
+                          ? 'Preparando upgrade…'
+                          : cancelScheduled
+                            ? 'Reativar e fazer upgrade para o Plano Prioridade'
+                            : 'Fazer upgrade para o Plano Prioridade'}
+                      </button>
+                    )}
                     {canCancel && !confirming && (
                       <button className="btn danger" type="button" onClick={() => setConfirming(true)}>
                         Cancelar assinatura

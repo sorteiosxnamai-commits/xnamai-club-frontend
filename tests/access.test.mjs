@@ -33,6 +33,13 @@ test('the atendimento table displays each customer plan', () => {
   assert.match(atendimento, /row\.subscription\?\.plan\?\.name/);
 });
 
+test('Basic customers can start an upgrade from their dashboard', () => {
+  const dashboard = readFileSync(new URL('../src/pages/CustomerDashboard.tsx', import.meta.url), 'utf8');
+  assert.match(dashboard, /subscription\.plan\?\.code === 'LAUNCH'/);
+  assert.match(dashboard, /Fazer upgrade para o Plano Prioridade/);
+  assert.match(dashboard, /sessionStorage\.setItem\('selected_plan'/);
+});
+
 test('rules distinguish Basic and Priority without advertising expired cashback', () => {
   const rules = readFileSync(new URL('../src/pages/Rules.tsx', import.meta.url), 'utf8');
   assert.match(rules, /Plano Basic: R\$ 149,97\/mês/);

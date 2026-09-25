@@ -12,6 +12,7 @@ type CurrentSubscription = {
   id: string;
   status: string;
   currentPeriodEnd?: string | null;
+  cancelledAt?: string | null;
   plan?: { id?: string; code?: string; name?: string } | null;
 };
 
@@ -124,10 +125,13 @@ export function Checkout() {
               <>
                 <h2>Confirmar upgrade</h2>
                 <p>
-                  Seu plano muda de <strong>{currentSubscription?.plan?.name || 'Plano Basic de Lançamento'}</strong> para{' '}
+                  Seu plano muda de <strong>{currentSubscription?.plan?.name || 'Plano Basic'}</strong> para{' '}
                   <strong>{selectedPlan.name}</strong>. A Stripe cobrará o ajuste proporcional agora e as próximas mensalidades serão de{' '}
                   <strong>{money(selectedPlan.monthlyPriceCents)}</strong>.
                 </p>
+                {currentSubscription?.cancelledAt && (
+                  <p>O cancelamento agendado será removido ao confirmar o upgrade.</p>
+                )}
                 <div className="secure-note"><ShieldCheck /> A forma de pagamento da assinatura atual será mantida.</div>
                 {error && <div className="error-box" role="alert">{error}</div>}
                 <button type="button" className="btn primary large full" onClick={finish} disabled={busy}>
