@@ -2,13 +2,14 @@ import { useNavigate } from 'react-router-dom';
 import {
   BadgePercent,
   Banknote,
-  Gift,
+  FlaskConical,
   Package,
   Repeat,
   ShoppingBag,
   Truck,
   UserX,
   XCircle,
+  Zap,
 } from 'lucide-react';
 import { PublicHeader } from '../components/PublicHeader';
 
@@ -18,8 +19,10 @@ const rules = [
     title: 'Assinatura',
     icon: Repeat,
     items: [
-      'A mensalidade do Xnamai Club é de R$ 149,97.',
-      'O acesso aos preços exclusivos do Club fica disponível enquanto a assinatura estiver ativa e regular.',
+      'O XNaMai Club possui planos de assinatura com benefícios e valores distintos, conforme o plano escolhido pelo cliente.',
+      'Plano Basic: R$ 149,97/mês.',
+      'Plano Prioridade: R$ 297,97/mês.',
+      'O acesso aos benefícios de cada plano permanece disponível enquanto a assinatura estiver ativa e regular.',
     ],
   },
   {
@@ -27,8 +30,8 @@ const rules = [
     title: 'Preços do Club',
     icon: BadgePercent,
     items: [
-      'Os preços exibidos para membros são exclusivos do Xnamai Club.',
-      'Os preços podem ser alterados pela Xnamai a qualquer momento, de acordo com estoque, fornecedores e condições de mercado.',
+      'Os preços exibidos para membros são exclusivos do XNaMai Club.',
+      'Os preços podem ser alterados pela XNaMai a qualquer momento, de acordo com estoque, fornecedores e condições de mercado.',
       'Os preços do Club não são cumulativos com outros descontos, cupons ou condições comerciais, salvo quando expressamente informado.',
     ],
   },
@@ -71,32 +74,45 @@ const rules = [
   },
   {
     number: '07',
-    title: 'Cancelamento da assinatura',
-    icon: XCircle,
+    title: 'Plano Prioridade',
+    icon: Zap,
+    highlight: true,
     items: [
-      'O cliente pode solicitar o cancelamento da assinatura.',
-      'Após o cancelamento, o acesso aos preços exclusivos do Club será encerrado conforme as condições da assinatura.',
-      'Pedidos já pagos permanecem sujeitos às condições acordadas no momento da compra.',
+      'O Plano Prioridade possui mensalidade de R$ 297,97 e é limitado a 50 clientes ativos.',
+      'A limitação de 50 clientes preserva a capacidade operacional necessária para oferecer prioridade nos pedidos.',
+      'O plano inclui todos os benefícios do Plano Basic, além do Fast Pass e do acesso ao XNaMai Lab.',
+      'Fast Pass: separação e envio no mesmo dia para pedidos finalizados com antecedência mínima de 6 horas, respeitando o horário de funcionamento e os horários-limite de operação da XNaMai.',
+      'O Fast Pass dá prioridade à separação e ao processamento do pedido. O prazo e a modalidade de transporte continuam sujeitos às condições de envio escolhidas pelo cliente.',
     ],
   },
   {
     number: '08',
-    title: 'Condição especial de lançamento',
-    icon: Gift,
-    highlight: true,
+    title: 'XNaMai Lab',
+    icon: FlaskConical,
     items: [
-      'Durante o período promocional de lançamento, a assinatura poderá contar com condições especiais de cashback, conforme divulgado pela Xnamai.',
-      'A condição de 100% de cashback sobre a primeira mensalidade é válida somente durante o período informado na campanha.',
-      'Após o encerramento da campanha, essa condição não estará mais disponível para novas assinaturas.',
+      'O XNaMai Lab é um grupo exclusivo para clientes do Plano Prioridade, limitado a 50 membros.',
+      'Os participantes poderão receber catálogos de novos produtos, indicar produtos de interesse e participar da identificação de demanda por novos produtos.',
+      'As indicações poderão ser consideradas pela XNaMai na definição de produtos a serem disponibilizados no site.',
+      'A participação no XNaMai Lab não garante a aquisição, disponibilidade ou inclusão de determinado produto no catálogo.',
     ],
   },
   {
     number: '09',
+    title: 'Cancelamento da assinatura',
+    icon: XCircle,
+    items: [
+      'O cliente pode solicitar o cancelamento da assinatura.',
+      'Após o cancelamento, o acesso aos benefícios do plano será encerrado conforme as condições da assinatura.',
+      'Pedidos já pagos permanecem sujeitos às condições acordadas no momento da compra.',
+    ],
+  },
+  {
+    number: '10',
     title: 'Clientes não membros',
     icon: UserX,
     items: [
       'Clientes que não possuem uma assinatura ativa não têm acesso aos preços exclusivos do Club.',
-      'Caso desejem comprar produtos que estejam com preço de Club, será aplicado o acréscimo definido pela Xnamai para compras de não membros.',
+      'Caso desejem comprar produtos que estejam com preço de Club, será aplicado o acréscimo definido pela XNaMai para compras de não membros.',
     ],
   },
 ];
@@ -109,7 +125,12 @@ export function Rules() {
       <main className="public-page rules-page">
         <div className="eyebrow">REGRAS DO XNAMAI CLUB</div>
         <h1 className="center-title"><span>Regras</span> do clube</h1>
-        <p className="center-subtitle">Condições de assinatura, preços, pedidos, frete e cancelamento.</p>
+        <p className="center-subtitle">O XNaMai Club possui dois planos: Basic e Prioridade.</p>
+        <section className="rules-fastpass" aria-label="Comparativo de antecedência dos planos">
+          <div><span>BASIC</span><strong>⏱️ 24H</strong><small>antecedência mínima</small></div>
+          <div><span>PRIORIDADE</span><strong>⚡ 6H</strong><small>antecedência mínima</small></div>
+          <p>O Plano Prioridade é limitado a <strong>50 clientes</strong> para preservar a capacidade operacional de atendimento e separação prioritária.</p>
+        </section>
         <ol className="rules-list">
           {rules.map((rule) => {
             const Icon = rule.icon;
@@ -133,7 +154,7 @@ export function Rules() {
           })}
         </ol>
         <div className="rules-cta">
-          <button className="btn primary large" onClick={() => navigate('/planos')}>Assinar o plano de lançamento</button>
+          <button className="btn primary large" onClick={() => navigate('/planos')}>Conhecer os planos</button>
         </div>
       </main>
     </>

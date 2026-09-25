@@ -23,11 +23,18 @@ type CurrentSubscription = {
 };
 
 export function planBenefits(plan: Plan) {
-  const benefits = ['Acesso ao XNaMai Club', 'Acesso aos preços do clube'];
-  if (plan.code === 'PRIORITY') {
-    benefits.push('Grupo XNaMai Lab', 'Ofertas exclusivas', 'Atendimento prioritário', 'Condições especiais', 'Prioridade nos pedidos');
-  }
-  return benefits;
+  if (plan.code === 'PRIORITY') return [
+    'Tudo do Plano Basic',
+    'Fast Pass: pedido no mesmo dia',
+    'Antecedência mínima de 6 horas',
+    'Prioridade na separação do pedido',
+    'XNaMai Lab — exclusivo para os 50 membros',
+  ];
+  return [
+    'Preços exclusivos do Club',
+    'Compre sem precisar fechar caixa',
+    'Pedido com antecedência mínima de 24 horas',
+  ];
 }
 
 export function PlanPrice({ plan }: { plan: Plan }) {
@@ -69,34 +76,60 @@ export function Plans() {
     <main className="public-page plans-page launch-plans">
       <div className="eyebrow">👑 PLANOS XNAMAI CLUB</div>
       <h1 className="center-title"><span>XNaMai</span> Club</h1>
-      <p className="center-subtitle">Escolha entre o acesso Basic de lançamento e a prioridade nos pedidos.</p>
+      <p className="center-subtitle">Basic para comprar melhor. Prioridade para pedir mais rápido.</p>
       {error && <div className="error-box" role="alert">{error}</div>}
       <div className="plans-grid">
-        {plans.map((plan) => (
-          <article className="plan-card featured" key={plan.id}>
-            <div className="recommended">{plan.code === 'PRIORITY' ? '★ PRIORIDADE NOS PEDIDOS' : '★ LANÇAMENTO'}</div>
+        {plans.map((plan) => {
+          const priority = plan.code === 'PRIORITY';
+          const current = currentSubscription?.status === 'ACTIVE' && currentSubscription.plan?.id === plan.id;
+          const upgrade = currentSubscription?.status === 'ACTIVE'
+            && currentSubscription.plan?.code === 'LAUNCH'
+            && priority;
+          const included = currentSubscription?.status === 'ACTIVE'
+            && currentSubscription.plan?.code === 'PRIORITY'
+            && plan.code === 'LAUNCH';
+          return (
+          <article className={`plan-card featured${priority ? ' priority-plan' : ' basic-plan'}`} key={plan.id}>
+            <div className="recommended">{priority ? '⚡ FAST PASS — APENAS 50 VAGAS' : 'PLANO BASIC'}</div>
             <div className="plan-icon"><Diamond /></div>
             <h3>{plan.name}</h3>
             <PlanPrice plan={plan} />
-            <div className="limit">{plan.description}</div>
+            <div className="plan-promise">
+              <strong>{priority ? 'O Fast Pass da XNaMai' : 'Acesso aos preços exclusivos do XNaMai Club'}</strong>
+              {priority && (
+                <p>Faça seu pedido com antecedência mínima de 6 horas para separação e envio no mesmo dia, dentro do nosso horário de operação.</p>
+              )}
+            </div>
+            <div className={`plan-speed${priority ? ' fast' : ''}`}>
+              <span>{priority ? 'PRIORIDADE' : 'BASIC'}</span>
+              <strong>{priority ? '⚡ 6H' : '⏱️ 24H'}</strong>
+              <small>antecedência mínima</small>
+            </div>
             <ul>
               {planBenefits(plan).map((benefit) => <li key={benefit}><Check /> {benefit}</li>)}
             </ul>
+            {priority && (
+              <>
+                <div className="plan-capacity">
+                  <strong>🔒 APENAS 50 CLIENTES</strong>
+                  <p>O Plano Prioridade é limitado a 50 clientes para garantir que a prioridade realmente funcione.</p>
+                </div>
+                <div className="plan-lab">
+                  <strong>🔬 XNaMai Lab</strong>
+                  <p><b>Grupo exclusivo para até 50 membros.</b> Receba catálogos de novos produtos e participe da escolha dos produtos que poderão entrar no site da XNaMai conforme a demanda.</p>
+                </div>
+              </>
+            )}
             <button
               className="btn primary"
-              disabled={currentSubscription?.status === 'ACTIVE' && currentSubscription.plan?.id === plan.id}
+              disabled={current || included}
               onClick={() => choose(plan)}
             >
-              {currentSubscription?.status === 'ACTIVE' && currentSubscription.plan?.id === plan.id
-                ? 'Plano atual'
-                : currentSubscription?.status === 'ACTIVE'
-                  && currentSubscription.plan?.code === 'LAUNCH'
-                  && plan.code === 'PRIORITY'
-                    ? 'Fazer upgrade'
-                    : 'Assinar plano'}
+              {current ? 'PLANO ATUAL' : included ? 'INCLUSO NO PLANO ATUAL' : upgrade ? 'FAZER UPGRADE' : priority ? 'QUERO O PRIORIDADE' : 'ASSINAR BASIC'}
             </button>
           </article>
-        ))}
+          );
+        })}
       </div>
     </main>
   </>;
