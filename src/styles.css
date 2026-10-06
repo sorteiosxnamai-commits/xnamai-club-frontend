@@ -25,7 +25,8 @@
 .desk-search{display:grid;gap:8px;margin:18px 0 8px;color:#dfe8f5;font-size:13px;font-weight:700;max-width:520px}
 .desk-search input{padding:13px;border-radius:8px;border:1px solid #2a3b59;background:#07101d;color:#fff;outline:none;font-weight:500}
 .desk-search input:focus{border-color:#2178ff}
-.desk-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.desk-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.desk-note{margin:0 0 14px;color:#8da0bf;font-size:13px;line-height:1.45}
 .desk-tabs button{border:1px solid #28405f;background:#091324;color:#b7c4d7;padding:12px 14px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
 .desk-tabs button small{border:1px solid #2a4d7a;border-radius:999px;padding:2px 8px;font-size:12px;color:#d7e6ff}
 .desk-tabs button.active{border-color:#217cff;color:#fff;background:#0c1c33}
@@ -178,6 +179,7 @@ body.nav-locked{overflow:hidden}
 @media(max-width:1100px){.kpi-grid.forecast-kpis,.kpi-grid.desk-kpis{grid-template-columns:1fr 1fr}}
 @media(max-width:760px){
   .kpi-grid.forecast-kpis{grid-template-columns:1fr}
+  .desk-tabs{grid-template-columns:1fr}
   .desk-tabs button{font-size:13px;padding:10px 8px;flex-wrap:wrap}
 }
 

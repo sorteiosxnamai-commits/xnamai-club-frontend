@@ -14,6 +14,7 @@ type DeskMember = {
   state?: string | null;
   phone?: string | null;
   createdAt: string;
+  boleto?: boolean;
   subscription?: {
     status?: string;
     startedAt?: string | null;
@@ -75,6 +76,17 @@ function matchesQuery(row: DeskMember, term: string) {
   return false;
 }
 
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+function renewalContact(validUntil?: string | null) {
+  if (!validUntil) return { label: 'Sem data de validade', urgent: false };
+  const end = new Date(validUntil).getTime();
+  if (Number.isNaN(end)) return { label: 'Sem data de validade', urgent: false };
+  if (end <= Date.now()) return { label: 'Vencido — ligar agora', urgent: true };
+  if (end - Date.now() <= WEEK_MS) return { label: 'Ligar agora', urgent: true };
+  return { label: `Ligar a partir de ${formatDate(new Date(end - WEEK_MS).toISOString())}`, urgent: false };
+}
+
 function paymentLabel(method?: DeskMember['paymentMethod']) {
   if (!method?.type) return '';
   if (method.type === 'CREDIT_CARD') {
@@ -116,6 +128,9 @@ const copy = {
   noBenefit: 'Sem benef\u00edcio',
   unsignedTitle: 'Criaram conta e n\u00e3o assinaram',
   joinedTitle: 'Aderiram ao clube',
+  boletoTitle: 'Boleto para renovar',
+  boletoNote: 'Quem pagou no boleto não renova no cartão. Ligue uma semana antes do vencimento.',
+  boletoEmpty: 'Nenhum pagamento por boleto.',
   unsignedEmpty: 'Nenhum cadastro sem assinatura.',
   joinedEmpty: 'Nenhum cliente aderiu ao clube ainda.',
   noSearch: 'Nenhum resultado para a busca.',
@@ -131,7 +146,7 @@ export function Atendimento() {
   const [query, setQuery] = useState('');
   const [savingId, setSavingId] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [tab, setTab] = useState<'joined' | 'unsigned'>('joined');
+  const [tab, setTab] = useState<'joined' | 'unsigned' | 'boleto'>('joined');
 
   async function loadMembers(refresh = false) {
     const payload = await api<DeskPayload>(`/atendimento/members${refresh ? '?refresh=1' : ''}`);
@@ -170,6 +185,10 @@ export function Atendimento() {
   const term = query.trim();
   const joined = useMemo(() => (data?.joined ?? []).filter((row) => matchesQuery(row, term)), [data, term]);
   const unsigned = useMemo(() => (data?.unsigned ?? []).filter((row) => matchesQuery(row, term)), [data, term]);
+  const boleto = useMemo(() => (data?.joined ?? [])
+    .filter((row) => row.boleto && matchesQuery(row, term))
+    .sort((a, b) => +new Date(a.subscription?.validUntil || '9999-12-31') - +new Date(b.subscription?.validUntil || '9999-12-31')), [data, term]);
+  const boletoCount = data?.joined.filter((row) => row.boleto).length ?? 0;
   const available = data?.joined.filter((row) => row.cashback.eligible && !row.cashback.used).length ?? 0;
   const used = data?.joined.filter((row) => row.cashback.used).length ?? 0;
   const active = data?.joined.filter((row) => row.subscription?.active).length ?? 0;
@@ -275,7 +294,18 @@ export function Atendimento() {
                 {copy.unsignedTitle}
                 <small>{data.unsigned.length}</small>
               </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={tab === 'boleto'}
+                className={tab === 'boleto' ? 'active' : ''}
+                onClick={() => setTab('boleto')}
+              >
+                {copy.boletoTitle}
+                <small>{boletoCount}</small>
+              </button>
             </div>
+            {tab === 'boleto' && <p className="desk-note">{copy.boletoNote}</p>}
             {tab === 'joined' ? (
               <table>
                 <thead>
@@ -352,7 +382,7 @@ export function Atendimento() {
                   ))}
                 </tbody>
               </table>
-            ) : (
+            ) : tab === 'unsigned' ? (
               <table>
                 <thead>
                   <tr>
@@ -379,6 +409,50 @@ export function Atendimento() {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Empresa</th>
+                    <th>Plano</th>
+                    <th>Status</th>
+                    <th>Validade</th>
+                    <th>Contato</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {boleto.length === 0 && (
+                    <tr>
+                      <td colSpan={6}>{boletoCount === 0 ? copy.boletoEmpty : copy.noSearch}</td>
+                    </tr>
+                  )}
+                  {boleto.map((row) => {
+                    const contact = renewalContact(row.subscription?.validUntil);
+                    return (
+                      <tr key={row.id}>
+                        <CustomerCells row={row} dash={copy.dash} />
+                        <td>
+                          <strong>{row.subscription?.plan?.name || 'Sem plano'}</strong>
+                          {row.subscription?.plan?.monthlyPriceCents != null && (
+                            <div className="cell-muted">{money(row.subscription.plan.monthlyPriceCents)}{copy.perMonth}</div>
+                          )}
+                          <div className="cell-muted">Boleto</div>
+                        </td>
+                        <td>
+                          <span className={`badge ${row.subscription?.active ? 'success' : 'danger'}`}>
+                            {row.subscription?.active ? 'Ativo' : 'Inativo'}
+                          </span>
+                        </td>
+                        <td>{row.subscription?.validUntil ? formatDate(row.subscription.validUntil) : copy.dash}</td>
+                        <td>
+                          <span className={`badge ${contact.urgent ? 'danger' : 'pending'}`}>{contact.label}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
