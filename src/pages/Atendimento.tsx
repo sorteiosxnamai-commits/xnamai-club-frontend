@@ -172,6 +172,7 @@ export function Atendimento() {
   const unsigned = useMemo(() => (data?.unsigned ?? []).filter((row) => matchesQuery(row, term)), [data, term]);
   const available = data?.joined.filter((row) => row.cashback.eligible && !row.cashback.used).length ?? 0;
   const used = data?.joined.filter((row) => row.cashback.used).length ?? 0;
+  const active = data?.joined.filter((row) => row.subscription?.active).length ?? 0;
 
   async function markCashbackUsed(member: DeskMember) {
     if (member.cashback.used || !member.cashback.eligible || savingId) return;
@@ -226,10 +227,11 @@ export function Atendimento() {
           </div>
         </header>
 
-        <section className="kpi-grid forecast-kpis">
+        <section className="kpi-grid forecast-kpis desk-kpis">
           <button type="button" className={`kpi desk-kpi${tab === 'joined' ? ' selected' : ''}`} onClick={() => setTab('joined')}>
             <div><span>Aderiram</span><strong>{data ? data.joined.length : copy.dash}</strong></div>
           </button>
+          <div className="kpi positive"><div><span>Assinaturas ativas</span><strong>{data ? active : copy.dash}</strong></div></div>
           <button type="button" className={`kpi desk-kpi${tab === 'unsigned' ? ' selected' : ''}`} onClick={() => setTab('unsigned')}>
             <div><span>Sem assinatura</span><strong>{data ? data.unsigned.length : copy.dash}</strong></div>
           </button>
