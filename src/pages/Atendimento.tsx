@@ -18,7 +18,16 @@ type DeskMember = {
     status?: string;
     startedAt?: string | null;
     currentPeriodEnd?: string | null;
+    validUntil?: string | null;
+    active?: boolean;
+    renewed?: boolean;
+    renewedAt?: string | null;
     plan?: { name?: string; monthlyPriceCents?: number | null } | null;
+  } | null;
+  paymentMethod?: {
+    type?: string;
+    cardBrand?: string | null;
+    cardLastFour?: string | null;
   } | null;
   cashback: {
     eligible: boolean;
@@ -64,6 +73,17 @@ function matchesQuery(row: DeskMember, term: string) {
     return onlyDigits(row.document).includes(digits) || onlyDigits(row.phone).includes(digits);
   }
   return false;
+}
+
+function paymentLabel(method?: DeskMember['paymentMethod']) {
+  if (!method?.type) return '';
+  if (method.type === 'CREDIT_CARD') {
+    const brand = method.cardBrand || 'Cartão';
+    return method.cardLastFour ? `${brand} •••• ${method.cardLastFour}` : brand;
+  }
+  if (method.type === 'PIX_RECURRING') return 'PIX';
+  if (method.type === 'BOLETO') return 'Boleto';
+  return method.type;
 }
 
 function CustomerCells({ row, dash }: { row: DeskMember; dash: string }) {
@@ -262,6 +282,7 @@ export function Atendimento() {
                     <th>Empresa</th>
                     <th>Plano</th>
                     <th>Status</th>
+                    <th>Validade</th>
                     <th>Cashback</th>
                     <th>Utilizado</th>
                   </tr>
@@ -269,7 +290,7 @@ export function Atendimento() {
                 <tbody>
                   {joined.length === 0 && (
                     <tr>
-                      <td colSpan={6}>{data.joined.length === 0 ? copy.joinedEmpty : copy.noSearch}</td>
+                      <td colSpan={7}>{data.joined.length === 0 ? copy.joinedEmpty : copy.noSearch}</td>
                     </tr>
                   )}
                   {joined.map((row) => (
@@ -280,11 +301,29 @@ export function Atendimento() {
                         {row.subscription?.plan?.monthlyPriceCents != null && (
                           <div className="cell-muted">{money(row.subscription.plan.monthlyPriceCents)}{copy.perMonth}</div>
                         )}
+                        {paymentLabel(row.paymentMethod) && (
+                          <div className="cell-muted">{paymentLabel(row.paymentMethod)}</div>
+                        )}
                       </td>
                       <td>
                         {row.subscription
-                          ? <StatusBadge status={row.subscription.status || ''} labels={subscriptionStatusLabel} />
+                          ? (
+                            <>
+                              <span className={`badge ${row.subscription.active ? 'success' : 'danger'}`}>
+                                {row.subscription.active ? 'Ativo' : 'Inativo'}
+                              </span>
+                              {row.subscription.status === 'CANCELLED' && (
+                                <div className="cell-muted">Cancelada</div>
+                              )}
+                            </>
+                          )
                           : <span className="badge pending">Sem assinatura</span>}
+                      </td>
+                      <td>
+                        {row.subscription?.validUntil ? formatDate(row.subscription.validUntil) : copy.dash}
+                        {row.subscription?.renewed && (
+                          <div><span className="badge success">Renovado em {formatDate(row.subscription.renewedAt)}</span></div>
+                        )}
                       </td>
                       <td>
                         {row.cashback.eligible ? (

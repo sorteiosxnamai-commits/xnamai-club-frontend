@@ -13,6 +13,13 @@ type Invoice = {
   subscription?: { plan?: { name?: string } };
 };
 
+type MembershipAccess = {
+  active: boolean;
+  validUntil?: string | null;
+  renewed: boolean;
+  renewedAt?: string | null;
+};
+
 type Dashboard = {
   subscription: {
     id?: string;
@@ -27,6 +34,7 @@ type Dashboard = {
     cardLastFour?: string | null;
   } | null;
   invoices: Invoice[];
+  access?: MembershipAccess;
 };
 
 const invoiceStatusLabel: Record<string, string> = {
@@ -34,15 +42,6 @@ const invoiceStatusLabel: Record<string, string> = {
   PENDING: 'Pendente',
   FAILED: 'Falhou',
   CANCELLED: 'Cancelado',
-};
-
-const subscriptionStatusLabel: Record<string, string> = {
-  PENDING: 'Pendente',
-  ACTIVE: 'Ativa',
-  PAYMENT_FAILED: 'Pagamento recusado',
-  PAST_DUE: 'Em atraso',
-  SUSPENDED: 'Suspensa',
-  CANCELLED: 'Cancelada',
 };
 
 function formatDate(value?: string | null) {
@@ -70,14 +69,16 @@ export function CustomerDashboard() {
   const invoices = data?.invoices ?? [];
   const planName = data?.subscription?.plan?.name || 'XNaMai Club';
   const subscription = data?.subscription;
+  const access = data?.access;
   const isCancelled = subscription?.status === 'CANCELLED';
   const cancelScheduled = Boolean(subscription?.cancelledAt) && !isCancelled;
   const canCancel = Boolean(subscription?.id) && !isCancelled && !cancelScheduled;
   const canUpgrade = subscription?.status === 'ACTIVE' && subscription.plan?.code === 'LAUNCH';
-  const accessUntil = formatDate(subscription?.currentPeriodEnd);
-  const statusText = cancelScheduled
-    ? 'Cancelamento agendado'
-    : subscriptionStatusLabel[subscription?.status || ''] || subscription?.status || '—';
+  const validUntil = access?.validUntil || subscription?.currentPeriodEnd;
+  const accessUntil = formatDate(validUntil);
+  const accessActive = Boolean(subscription?.id) && (access ? access.active : subscription?.status === 'ACTIVE');
+  const statusText = !subscription?.id ? '—' : accessActive ? 'Ativo' : 'Inativo';
+  const validityLabel = isCancelled ? 'Encerrada em' : 'Válido até';
 
   async function cancelSubscription() {
     if (!subscription?.id || busy) return;
@@ -166,6 +167,11 @@ export function CustomerDashboard() {
                 </div>
                 <div className="status-line"><CheckCircle2 /><span>Status</span><b>{statusText}</b></div>
                 <div className="status-line">
+                  <CalendarDays />
+                  <span>{validityLabel}</span>
+                  <b>{isCancelled ? formatDate(subscription?.cancelledAt) : accessUntil}</b>
+                </div>
+                <div className="status-line">
                   <CreditCard />
                   <span>Pagamento</span>
                   <b>
@@ -173,9 +179,17 @@ export function CustomerDashboard() {
                       ? `${data.paymentMethod.cardBrand || 'Cartão'} •••• ${data.paymentMethod.cardLastFour || '----'}`
                       : data.paymentMethod?.type === 'PIX_RECURRING'
                         ? 'PIX recorrente'
-                        : 'Não informado'}
+                        : data.paymentMethod?.type === 'BOLETO'
+                          ? 'Boleto'
+                          : 'Não informado'}
                   </b>
                 </div>
+                {access?.renewed && (
+                  <p className="renewal-flag">
+                    Assinatura renovada em <strong>{formatDate(access.renewedAt)}</strong>.
+                    {accessActive ? <> Continua ativa até <strong>{accessUntil}</strong>.</> : null}
+                  </p>
+                )}
                 {subscription?.id && (
                   <div className="plan-actions">
                     {canUpgrade && (
@@ -234,7 +248,7 @@ export function CustomerDashboard() {
               </div>
               <div className="metric-card">
                 <CalendarDays />
-                <span>{isCancelled ? 'Encerrada em' : cancelScheduled ? 'Acesso até' : 'Próxima cobrança'}</span>
+                <span>{validityLabel}</span>
                 <strong>
                   {isCancelled
                     ? formatDate(subscription?.cancelledAt)

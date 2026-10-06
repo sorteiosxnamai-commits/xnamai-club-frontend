@@ -215,3 +215,6 @@ body.nav-locked{overflow:hidden}
   .rules-fastpass{grid-template-columns:1fr;padding:14px}
   .rules-fastpass>p{grid-column:1}
 }
+
+.renewal-flag{margin:12px 0 0;padding:10px 12px;border-radius:9px;border:1px solid #1c7352;background:#0b281f88;color:#b7f0d0;font-size:14px;line-height:1.45}
+.renewal-flag strong{color:#fff}
