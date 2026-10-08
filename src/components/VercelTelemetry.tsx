@@ -7,8 +7,10 @@ import { logAppEvent } from '../telemetry';
 export function VercelTelemetry() {
   const location = useLocation();
   const route = location.pathname;
+  const privateRecovery = route === '/redefinir-senha';
 
   useEffect(() => {
+    if (privateRecovery) return;
     const onError = (event: ErrorEvent) => {
       logAppEvent('Erro no app', {
         message: String(event.message || 'erro').slice(0, 180),
@@ -29,8 +31,9 @@ export function VercelTelemetry() {
       window.removeEventListener('error', onError);
       window.removeEventListener('unhandledrejection', onReject);
     };
-  }, []);
+  }, [privateRecovery]);
 
+  if (privateRecovery) return null;
   return (
     <>
       <Analytics path={route} route={route} />

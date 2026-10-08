@@ -256,6 +256,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
             {mode === 'register' && !fieldErrors.password && <span className="field-hint">Mínimo de 8 caracteres.</span>}
             <FieldError message={fieldErrors.password} />
           </label>
+          {mode === 'login' && <p className="auth-recovery"><Link to="/esqueci-senha">Esqueci minha senha</Link></p>}
           <button className="btn primary large full" type="submit" disabled={busy}>
             {busy
               ? (mode === 'login' ? 'Entrando...' : 'Criando conta...')

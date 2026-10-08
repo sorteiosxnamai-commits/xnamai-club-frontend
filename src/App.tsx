@@ -7,6 +7,7 @@ import { Plans } from './pages/Plans';
 import { Rules } from './pages/Rules';
 import { Simulator } from './pages/Simulator';
 import { AuthPage } from './pages/AuthPage';
+import { ForgotPasswordPage, ResetPasswordPage } from './pages/PasswordRecovery';
 import { Checkout } from './pages/Checkout';
 import { Confirmation } from './pages/Confirmation';
 import { CustomerDashboard } from './pages/CustomerDashboard';
@@ -32,6 +33,8 @@ export default function App() {
               <Route path="/regras" element={<Rules />} />
               <Route path="/simulador" element={<Simulator />} />
               <Route path="/login" element={<AuthPage mode="login" />} />
+              <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+              <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
               <Route path="/cadastro" element={<AuthPage mode="register" />} />
               <Route path="/atendimento" element={<Atendimento />} />
               <Route path="/checkout" element={<Protected role="CUSTOMER"><Checkout /></Protected>} />

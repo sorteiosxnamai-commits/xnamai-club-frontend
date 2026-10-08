@@ -165,6 +165,7 @@ body.nav-locked{overflow:hidden}
 }
 
 .field-error{color:#ffb7b7;font-size:12px;font-weight:600;margin-top:4px}
+.auth-recovery{text-align:right;margin:8px 0 18px;font-size:13px;color:#75afff}.auth-recovery a:hover{text-decoration:underline}
 .field-hint{color:#8da0bf;font-size:12px;font-weight:500;margin-top:4px}
 .auth-card input.invalid,.auth-card select.invalid{border-color:#8d3232}
 .error-box{font-weight:600}
