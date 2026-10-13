@@ -24,6 +24,8 @@ type Dashboard = {
   subscription: {
     id?: string;
     status?: string;
+    startedAt?: string | null;
+    currentPeriodStart?: string;
     currentPeriodEnd?: string;
     cancelledAt?: string | null;
     plan?: { id?: string; code?: string; name?: string; monthlyPriceCents?: number | null };
@@ -47,6 +49,11 @@ const invoiceStatusLabel: Record<string, string> = {
 function formatDate(value?: string | null) {
   if (!value) return '—';
   return new Date(value).toLocaleDateString('pt-BR');
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return '—';
+  return new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 }
 
 export function CustomerDashboard() {
@@ -106,15 +113,20 @@ export function CustomerDashboard() {
   const access = data?.access;
   const isCancelled = subscription?.status === 'CANCELLED';
   const cancelScheduled = Boolean(subscription?.cancelledAt) && !isCancelled;
-  const canCancel = Boolean(subscription?.id) && !isCancelled && !cancelScheduled;
-  const canChangeCard = Boolean(subscription?.id) && !isCancelled && data?.paymentMethod?.type !== 'BOLETO';
+  const isPix = data?.paymentMethod?.type === 'PIX_RECURRING';
+  const canCancel = Boolean(subscription?.id) && !isCancelled && !cancelScheduled && !isPix;
+  const canChangeCard = Boolean(subscription?.id) && !isCancelled && !isPix && data?.paymentMethod?.type !== 'BOLETO';
   const cardActionLabel = data?.paymentMethod?.type === 'CREDIT_CARD' ? 'Trocar cartão' : 'Cadastrar cartão';
-  const canUpgrade = subscription?.status === 'ACTIVE' && subscription.plan?.code === 'LAUNCH';
+  const canUpgrade = subscription?.status === 'ACTIVE' && !isPix && subscription.plan?.code === 'LAUNCH';
   const validUntil = access?.validUntil || subscription?.currentPeriodEnd;
   const accessUntil = formatDate(validUntil);
   const accessActive = Boolean(subscription?.id) && (access ? access.active : subscription?.status === 'ACTIVE');
   const statusText = !subscription?.id ? '—' : accessActive ? 'Ativo' : 'Inativo';
-  const validityLabel = isCancelled ? 'Encerrada em' : 'Válido até';
+  const validityLabel = isCancelled ? 'Encerrada em' : isPix ? 'Vence em' : 'Válido até';
+  const pixExpiresAt = access?.validUntil || subscription?.currentPeriodEnd;
+  const pixMsLeft = pixExpiresAt ? new Date(pixExpiresAt).getTime() - Date.now() : null;
+  const pixExpired = Boolean(isPix && pixMsLeft != null && pixMsLeft <= 0);
+  const pixSoon = Boolean(isPix && pixMsLeft != null && pixMsLeft > 0 && pixMsLeft <= 7 * 24 * 60 * 60 * 1000);
 
   async function cancelSubscription() {
     if (!subscription?.id || busy) return;
@@ -155,6 +167,31 @@ export function CustomerDashboard() {
       const priority = plans.find((plan) => plan.code === 'PRIORITY');
       if (!priority) throw new Error('Plano Prioridade indisponível no momento.');
       sessionStorage.setItem('selected_plan', JSON.stringify(priority));
+      navigate('/checkout');
+    } catch (e) {
+      setError((e as Error).message);
+      setBusy(false);
+    }
+  }
+
+  async function renewPix() {
+    if (busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      const plans = await api<Array<{
+        id: string;
+        code: string;
+        name: string;
+        monthlyPriceCents: number | null;
+        compareAtPriceCents?: number | null;
+        purchaseLimitCents: number | null;
+        description: string;
+      }>>('/plans');
+      const current = plans.find((plan) => plan.code === subscription?.plan?.code) || plans[0];
+      if (!current) throw new Error('Nenhum plano disponível para renovar.');
+      sessionStorage.setItem('selected_plan', JSON.stringify(current));
+      sessionStorage.setItem('checkout_method', 'PIX_RECURRING');
       navigate('/checkout');
     } catch (e) {
       setError((e as Error).message);
@@ -206,6 +243,19 @@ export function CustomerDashboard() {
           </div>
         )}
         {success && <div className="success-box">{success}</div>}
+        {data && isPix && (
+          <div className={`pix-alert${pixExpired ? ' expired' : pixSoon ? ' soon' : ''}`} role="status">
+            <strong>{pixExpired ? 'PIX vencido' : pixSoon ? 'PIX perto do vencimento' : 'PIX avulso'}</strong>
+            <p>
+              Entrada em <strong>{formatDateTime(subscription?.currentPeriodStart || subscription?.startedAt)}</strong>.
+              O acesso vence em <strong>{formatDateTime(pixExpiresAt)}</strong> e não renova sozinho.
+              {pixExpired ? ' O acesso está encerrado até o próximo PIX.' : ' Pague de novo antes desse horário para continuar.'}
+            </p>
+            <button className="btn primary" type="button" disabled={busy} onClick={renewPix}>
+              {busy ? 'Abrindo PIX…' : 'Renovar com PIX'}
+            </button>
+          </div>
+        )}
         {data && (
           <>
             <section className="customer-top">
@@ -219,7 +269,7 @@ export function CustomerDashboard() {
                 <div className="status-line">
                   <CalendarDays />
                   <span>{validityLabel}</span>
-                  <b>{isCancelled ? formatDate(subscription?.cancelledAt) : accessUntil}</b>
+                  <b>{isCancelled ? formatDate(subscription?.cancelledAt) : isPix ? formatDateTime(pixExpiresAt) : accessUntil}</b>
                 </div>
                 <div className="status-line">
                   <CreditCard />
@@ -228,7 +278,7 @@ export function CustomerDashboard() {
                     {data.paymentMethod?.type === 'CREDIT_CARD'
                       ? `${data.paymentMethod.cardBrand || 'Cartão'} •••• ${data.paymentMethod.cardLastFour || '----'}`
                       : data.paymentMethod?.type === 'PIX_RECURRING'
-                        ? 'PIX recorrente'
+                        ? 'PIX'
                         : data.paymentMethod?.type === 'BOLETO'
                           ? 'Boleto'
                           : 'Não informado'}
@@ -314,7 +364,9 @@ export function CustomerDashboard() {
                 <strong>
                   {isCancelled
                     ? formatDate(subscription?.cancelledAt)
-                    : accessUntil}
+                    : isPix
+                      ? formatDateTime(pixExpiresAt)
+                      : accessUntil}
                 </strong>
               </div>
             </section>

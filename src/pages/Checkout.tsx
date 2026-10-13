@@ -13,6 +13,7 @@ type CurrentSubscription = {
   status: string;
   currentPeriodEnd?: string | null;
   cancelledAt?: string | null;
+  gatewaySubscriptionId?: string | null;
   plan?: { id?: string; code?: string; name?: string } | null;
 };
 
@@ -32,13 +33,21 @@ export function Checkout() {
     try { return JSON.parse(sessionStorage.getItem('selected_plan') || '') as Plan; }
     catch { return null; }
   }, []);
-  const [method, setMethod] = useState<PaymentMethodChoice>('CREDIT_CARD');
+  const [method, setMethod] = useState<PaymentMethodChoice>(
+    sessionStorage.getItem('checkout_method') === 'PIX_RECURRING' ? 'PIX_RECURRING' : 'CREDIT_CARD',
+  );
   const [step, setStep] = useState<2 | 3>(2);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [currentSubscription, setCurrentSubscription] = useState<CurrentSubscription | null | undefined>(undefined);
   const nextCharge = addCalendarMonth();
   const isPix = method === 'PIX_RECURRING';
+  const coveredUntil = currentSubscription?.currentPeriodEnd
+    && !currentSubscription.gatewaySubscriptionId
+    && new Date(currentSubscription.currentPeriodEnd).getTime() > Date.now()
+    ? new Date(currentSubscription.currentPeriodEnd)
+    : null;
+  const pixDue = coveredUntil ? addCalendarMonth(coveredUntil) : nextCharge;
 
   useEffect(() => {
     api<CurrentSubscription>('/subscriptions/me')
@@ -49,6 +58,7 @@ export function Checkout() {
   if (!plan) return <Navigate to="/planos" replace />;
   const selectedPlan = plan;
   const isUpgrade = currentSubscription?.status === 'ACTIVE'
+    && Boolean(currentSubscription.gatewaySubscriptionId)
     && currentSubscription.plan?.code === 'LAUNCH'
     && selectedPlan.code === 'PRIORITY';
 
@@ -104,8 +114,8 @@ export function Checkout() {
             ? 'A assinatura atual será atualizada na Stripe, sem criar uma segunda assinatura.'
             : step === 2
             ? 'Escolha como deseja pagar sua assinatura do XNaMai Club.'
-            : isPix
-              ? `A Stripe exibe o QR Code ou o código PIX. Depois de autorizar o Pix Automático no banco, a cobrança mensal fica no dia ${formatDate(new Date())} — a próxima é ${formatDate(nextCharge)}.`
+              : isPix
+              ? `O QR Code aparece na Stripe. O acesso vale um mês, contado do horário da confirmação, e vence em ${formatDate(pixDue)}. Não renova sozinho.`
               : `O cartão é tokenizado na Stripe. A cobrança recorrente fica no dia ${formatDate(new Date())} de cada mês — a próxima é ${formatDate(nextCharge)}.`}
         </p>
         <section className="checkout-grid">
@@ -147,7 +157,7 @@ export function Checkout() {
                 </button>
                 <button type="button" className={`payment-option ${isPix ? 'selected' : ''}`} onClick={() => setMethod('PIX_RECURRING')}>
                   <QrCode />
-                  <span><b>PIX recorrente</b><small>QR Code ou copia e cola na Stripe, com mandato Pix Automático para as próximas mensalidades.</small></span>
+                  <span><b>PIX</b><small>Pagamento único de um mês. Você renova todo mês, antes do vencimento.</small></span>
                 </button>
                 <div className="secure-note"><ShieldCheck /> A assinatura só ativa depois da autorização na Stripe.</div>
                 <button type="button" className="btn primary large full" onClick={() => { setError(''); setStep(3); }}>Continuar</button>
@@ -162,8 +172,8 @@ export function Checkout() {
                       <p>O QR Code e o código copia e cola aparecem na página da Stripe, não nesta tela.</p>
                     </div>
                     <p className="security-copy">
-                      Você autoriza o Pix Automático no app do banco. A Stripe guarda o mandato da recorrência.
-                      Dados bancários não passam pelo XNaMai.
+                      O PIX vale um mês a partir do horário em que o pagamento for confirmado.
+                      Depois do vencimento o acesso encerra, até você pagar de novo.
                     </p>
                   </>
                 ) : (
@@ -189,8 +199,8 @@ export function Checkout() {
               <div><span>De</span><b className="price-was">{money(plan.compareAtPriceCents)}</b></div>
             )}
             <div><span>Mensalidade</span><b>{money(plan.monthlyPriceCents)}</b></div>
-            <div><span>Forma</span><b>{isUpgrade ? 'Pagamento atual' : isPix ? 'PIX recorrente' : 'Cartão'}</b></div>
-            <div><span>Próxima cobrança</span><b>{formatDate(isUpgrade && currentSubscription?.currentPeriodEnd ? new Date(currentSubscription.currentPeriodEnd) : nextCharge)}</b></div>
+            <div><span>Forma</span><b>{isUpgrade ? 'Pagamento atual' : isPix ? 'PIX' : 'Cartão'}</b></div>
+            <div><span>{isPix ? 'Vencimento' : 'Próxima cobrança'}</span><b>{formatDate(isPix ? pixDue : isUpgrade && currentSubscription?.currentPeriodEnd ? new Date(currentSubscription.currentPeriodEnd) : nextCharge)}</b></div>
             <hr />
             <div className="total"><span>Total mensal</span><b>{money(plan.monthlyPriceCents)}</b></div>
             <div className="secure-note"><ShieldCheck /> Ambiente protegido</div>

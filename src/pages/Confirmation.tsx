@@ -9,6 +9,7 @@ export function Confirmation() {
   const [params] = useSearchParams();
   const sessionId = params.get('session_id');
   const [error, setError] = useState('');
+  const [validUntil, setValidUntil] = useState('');
   const [ready, setReady] = useState(!sessionId);
 
   useEffect(() => {
@@ -17,7 +18,8 @@ export function Confirmation() {
     async function fetchConfirm() {
       try {
         const url = `/subscriptions/confirm?sessionId=${encodeURIComponent(sessionId!)}`;
-        await api(url);
+        const result = await api<{ nextBillingDate?: string | null }>(url);
+        if (result.nextBillingDate) setValidUntil(result.nextBillingDate);
         sessionStorage.removeItem('selected_plan');
         setReady(true);
       } catch (e) {
@@ -45,7 +47,7 @@ export function Confirmation() {
             ? error
             : ready
               ? sessionStorage.getItem('checkout_method') === 'PIX_RECURRING'
-                ? 'A Stripe confirmou o Pix Automático e agendou as próximas cobranças da assinatura.'
+                ? `PIX confirmado. O acesso vale até ${validUntil ? new Date(validUntil).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'o vencimento'} e não renova sozinho.`
                 : 'A Stripe autorizou o cartão, gerou o token da recorrência e agendou a próxima cobrança no mesmo dia do mês.'
               : 'Confirmando autorização na Stripe...'}
         </p>

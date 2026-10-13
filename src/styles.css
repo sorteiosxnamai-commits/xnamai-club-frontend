@@ -222,6 +222,12 @@ body.nav-locked{overflow:hidden}
 
 .renewal-flag{margin:12px 0 0;padding:10px 12px;border-radius:9px;border:1px solid #1c7352;background:#0b281f88;color:#b7f0d0;font-size:14px;line-height:1.45}
 .renewal-flag strong{color:#fff}
+.pix-alert{margin:18px 0 0;padding:14px 16px;border-radius:12px;border:1px solid #2d79ff;background:#0c1c33;color:#d7e6ff;display:grid;gap:8px}
+.pix-alert p{margin:0;line-height:1.45}
+.pix-alert strong{color:#fff}
+.pix-alert .btn{width:auto;justify-self:start}
+.pix-alert.soon{border-color:#c9a227;background:#2a220d;color:#ffe7a3}
+.pix-alert.expired{border-color:#8d3232;background:#3a1616;color:#ffb7b7}
 .card-change{grid-column:2;display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:-4px}
 .card-change .btn{padding:7px 12px;font-size:13px}
 .card-change p{margin:0;color:#8da0bf;font-size:12px;line-height:1.4;text-align:right}
