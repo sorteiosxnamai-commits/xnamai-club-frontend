@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CalendarDays, CheckCircle2, CreditCard, ReceiptText } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, money } from '../api/client';
 import { PublicHeader } from '../components/PublicHeader';
 
@@ -51,11 +51,13 @@ function formatDate(value?: string | null) {
 
 export function CustomerDashboard() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<Dashboard | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [cardBusy, setCardBusy] = useState(false);
 
   async function loadDashboard() {
     const dashboard = await api<Dashboard>('/me/dashboard');
@@ -63,8 +65,40 @@ export function CustomerDashboard() {
   }
 
   useEffect(() => {
-    loadDashboard().catch((e) => setError(e.message));
-  }, []);
+    const sessionId = searchParams.get('card_session_id');
+    let ignore = false;
+
+    async function start() {
+      if (sessionId) {
+        setCardBusy(true);
+        try {
+          const result = await api<{ message: string }>(
+            `/subscriptions/payment-method/confirm?sessionId=${encodeURIComponent(sessionId)}`,
+          );
+          if (!ignore) setSuccess(result.message);
+        } catch (e) {
+          if (!ignore) setError((e as Error).message);
+        } finally {
+          if (!ignore) {
+            const next = new URLSearchParams(searchParams);
+            next.delete('card_session_id');
+            setSearchParams(next, { replace: true });
+            setCardBusy(false);
+          }
+        }
+      }
+      try {
+        await loadDashboard();
+      } catch (e) {
+        if (!ignore) setError((e as Error).message);
+      }
+    }
+
+    start();
+    return () => {
+      ignore = true;
+    };
+  }, [searchParams, setSearchParams]);
 
   const invoices = data?.invoices ?? [];
   const planName = data?.subscription?.plan?.name || 'XNaMai Club';
@@ -73,6 +107,8 @@ export function CustomerDashboard() {
   const isCancelled = subscription?.status === 'CANCELLED';
   const cancelScheduled = Boolean(subscription?.cancelledAt) && !isCancelled;
   const canCancel = Boolean(subscription?.id) && !isCancelled && !cancelScheduled;
+  const canChangeCard = Boolean(subscription?.id) && !isCancelled && data?.paymentMethod?.type !== 'BOLETO';
+  const cardActionLabel = data?.paymentMethod?.type === 'CREDIT_CARD' ? 'Trocar cartão' : 'Cadastrar cartão';
   const canUpgrade = subscription?.status === 'ACTIVE' && subscription.plan?.code === 'LAUNCH';
   const validUntil = access?.validUntil || subscription?.currentPeriodEnd;
   const accessUntil = formatDate(validUntil);
@@ -123,6 +159,20 @@ export function CustomerDashboard() {
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);
+    }
+  }
+
+  async function changeCard() {
+    if (cardBusy || busy) return;
+    setCardBusy(true);
+    setError('');
+    setSuccess('');
+    try {
+      const result = await api<{ url: string }>('/subscriptions/payment-method', { method: 'POST', body: '{}' });
+      window.location.href = result.url;
+    } catch (e) {
+      setError((e as Error).message);
+      setCardBusy(false);
     }
   }
 
@@ -184,6 +234,18 @@ export function CustomerDashboard() {
                           : 'Não informado'}
                   </b>
                 </div>
+                {canChangeCard && (
+                  <div className="card-change">
+                    <button className="btn ghost" type="button" disabled={busy || cardBusy} onClick={changeCard}>
+                      {searchParams.get('card_session_id')
+                        ? 'Confirmando cartão…'
+                        : cardBusy
+                          ? 'Abrindo pagamento seguro…'
+                          : cardActionLabel}
+                    </button>
+                    <p>Se a mensalidade não passou, o novo cartão é cobrado na hora.</p>
+                  </div>
+                )}
                 {access?.renewed && (
                   <p className="renewal-flag">
                     Assinatura renovada em <strong>{formatDate(access.renewedAt)}</strong>.

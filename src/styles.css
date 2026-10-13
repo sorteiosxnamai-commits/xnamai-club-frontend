@@ -222,3 +222,10 @@ body.nav-locked{overflow:hidden}
 
 .renewal-flag{margin:12px 0 0;padding:10px 12px;border-radius:9px;border:1px solid #1c7352;background:#0b281f88;color:#b7f0d0;font-size:14px;line-height:1.45}
 .renewal-flag strong{color:#fff}
+.card-change{grid-column:2;display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:-4px}
+.card-change .btn{padding:7px 12px;font-size:13px}
+.card-change p{margin:0;color:#8da0bf;font-size:12px;line-height:1.4;text-align:right}
+@media(max-width:760px){
+  .card-change{grid-column:1;align-items:flex-start}
+  .card-change p{text-align:left}
+}
