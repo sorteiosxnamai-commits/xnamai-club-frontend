@@ -1,0 +1,1 @@
+export const PIX_MONTH_PRICE_CENTS = 19997;

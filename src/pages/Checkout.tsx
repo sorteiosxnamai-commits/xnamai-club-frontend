@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CreditCard, QrCode, ShieldCheck } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { api, money } from '../api/client';
+import { PIX_MONTH_PRICE_CENTS } from '../billing';
 import { PublicHeader } from '../components/PublicHeader';
 import { logAppEvent } from '../telemetry';
 import { Plan, PlanPrice, planBenefits } from './Plans';
@@ -42,6 +43,7 @@ export function Checkout() {
   const [currentSubscription, setCurrentSubscription] = useState<CurrentSubscription | null | undefined>(undefined);
   const nextCharge = addCalendarMonth();
   const isPix = method === 'PIX_RECURRING';
+  const amountCents = isPix ? PIX_MONTH_PRICE_CENTS : plan?.monthlyPriceCents;
   const coveredUntil = currentSubscription?.currentPeriodEnd
     && !currentSubscription.gatewaySubscriptionId
     && new Date(currentSubscription.currentPeriodEnd).getTime() > Date.now()
@@ -122,7 +124,15 @@ export function Checkout() {
           <aside className="panel plan-summary">
             <div className="diamond-mark">◇</div>
             <h2>{plan.name}</h2>
-            <div className="checkout-price"><PlanPrice plan={plan} /></div>
+            <div className="checkout-price">
+              {isPix ? (
+                <div className="price">
+                  <span className="price-now">{money(PIX_MONTH_PRICE_CENTS)}<small>/mês</small></span>
+                </div>
+              ) : (
+                <PlanPrice plan={plan} />
+              )}
+            </div>
             <p>{plan.description}</p>
             <ul>
               {planBenefits(plan).map((benefit) => <li key={benefit}>✓ {benefit}</li>)}
@@ -157,7 +167,7 @@ export function Checkout() {
                 </button>
                 <button type="button" className={`payment-option ${isPix ? 'selected' : ''}`} onClick={() => setMethod('PIX_RECURRING')}>
                   <QrCode />
-                  <span><b>PIX</b><small>Pagamento único de um mês. Você renova todo mês, antes do vencimento.</small></span>
+                  <span><b>PIX</b><small>R$ 199,97 por um mês. Você renova todo mês, antes do vencimento.</small></span>
                 </button>
                 <div className="secure-note"><ShieldCheck /> A assinatura só ativa depois da autorização na Stripe.</div>
                 <button type="button" className="btn primary large full" onClick={() => { setError(''); setStep(3); }}>Continuar</button>
@@ -195,14 +205,14 @@ export function Checkout() {
           <aside className="panel order-summary">
             <h2>Resumo da assinatura</h2>
             <div><span>Plano</span><b>{plan.name}</b></div>
-            {plan.compareAtPriceCents != null && (
+            {plan.compareAtPriceCents != null && !isPix && (
               <div><span>De</span><b className="price-was">{money(plan.compareAtPriceCents)}</b></div>
             )}
-            <div><span>Mensalidade</span><b>{money(plan.monthlyPriceCents)}</b></div>
+            <div><span>Mensalidade</span><b>{money(amountCents)}</b></div>
             <div><span>Forma</span><b>{isUpgrade ? 'Pagamento atual' : isPix ? 'PIX' : 'Cartão'}</b></div>
             <div><span>{isPix ? 'Vencimento' : 'Próxima cobrança'}</span><b>{formatDate(isPix ? pixDue : isUpgrade && currentSubscription?.currentPeriodEnd ? new Date(currentSubscription.currentPeriodEnd) : nextCharge)}</b></div>
             <hr />
-            <div className="total"><span>Total mensal</span><b>{money(plan.monthlyPriceCents)}</b></div>
+            <div className="total"><span>Total mensal</span><b>{money(amountCents)}</b></div>
             <div className="secure-note"><ShieldCheck /> Ambiente protegido</div>
           </aside>
         </section>

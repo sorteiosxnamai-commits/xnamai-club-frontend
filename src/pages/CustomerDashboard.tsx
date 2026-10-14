@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { CalendarDays, CheckCircle2, CreditCard, ReceiptText } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, money } from '../api/client';
+import { PIX_MONTH_PRICE_CENTS } from '../billing';
 import { PublicHeader } from '../components/PublicHeader';
 
 type Invoice = {
@@ -263,7 +264,7 @@ export function CustomerDashboard() {
                 <div>
                   <small>PLANO ATUAL</small>
                   <h2>{subscription?.plan?.name || 'Sem plano'}</h2>
-                  <div className="big-number">{money(subscription?.plan?.monthlyPriceCents)}<small>/mês</small></div>
+                  <div className="big-number">{money(isPix ? PIX_MONTH_PRICE_CENTS : subscription?.plan?.monthlyPriceCents)}<small>/mês</small></div>
                 </div>
                 <div className="status-line"><CheckCircle2 /><span>Status</span><b>{statusText}</b></div>
                 <div className="status-line">
