@@ -135,11 +135,13 @@ export function CustomerDashboard() {
     setError('');
     setSuccess('');
     try {
-      await api(`/subscriptions/${subscription.id}/cancel`, { method: 'POST', body: '{}' });
+      const result = await api<{ status: string }>(`/subscriptions/${subscription.id}/cancel`, { method: 'POST', body: '{}' });
       setConfirming(false);
       await loadDashboard();
       setSuccess(
-        subscription.currentPeriodEnd
+        result.status === 'CANCELLED'
+          ? 'Assinatura encerrada. Para pagar novamente, clique em Assinar novamente.'
+          : subscription.currentPeriodEnd
           ? `Cancelamento confirmado. Você continua com acesso até ${accessUntil} e não haverá novas cobranças.`
           : 'Cancelamento confirmado. Não haverá novas cobranças.',
       );
