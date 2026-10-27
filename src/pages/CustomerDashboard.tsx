@@ -115,8 +115,9 @@ export function CustomerDashboard() {
   const isCancelled = subscription?.status === 'CANCELLED';
   const cancelScheduled = Boolean(subscription?.cancelledAt) && !isCancelled;
   const isPix = data?.paymentMethod?.type === 'PIX_RECURRING';
+  const isBoleto = data?.paymentMethod?.type === 'BOLETO';
   const canCancel = Boolean(subscription?.id) && !isCancelled && !cancelScheduled && !isPix;
-  const canChangeCard = Boolean(subscription?.id) && !isCancelled && !isPix && data?.paymentMethod?.type !== 'BOLETO';
+  const canChangeCard = Boolean(subscription?.id) && !isCancelled && !isPix && !isBoleto;
   const cardActionLabel = data?.paymentMethod?.type === 'CREDIT_CARD' ? 'Trocar cartão' : 'Cadastrar cartão';
   const canUpgrade = subscription?.status === 'ACTIVE' && !isPix && subscription.plan?.code === 'LAUNCH';
   const validUntil = access?.validUntil || subscription?.currentPeriodEnd;
@@ -196,6 +197,27 @@ export function CustomerDashboard() {
       sessionStorage.setItem('selected_plan', JSON.stringify(current));
       sessionStorage.setItem('checkout_method', 'PIX_RECURRING');
       navigate('/checkout');
+    } catch (e) {
+      setError((e as Error).message);
+      setBusy(false);
+    }
+  }
+
+  async function payBoletoWith(method: 'CREDIT_CARD' | 'PIX_RECURRING') {
+    if (busy || cardBusy) return;
+    setBusy(true);
+    setError('');
+    setSuccess('');
+    try {
+      const plans = await api<Array<{ id: string; code: string }>>('/plans');
+      const plan = plans.find((item) => item.code === subscription?.plan?.code);
+      if (!plan) throw new Error('Plano indisponível. Fale com o atendimento.');
+      const current = await api<{ status: string; gatewaySubscriptionId?: string | null }>('/subscriptions/me');
+      const result = await api<{ url: string }>(
+        method === 'CREDIT_CARD' && current.status !== 'CANCELLED' && current.gatewaySubscriptionId ? '/subscriptions/payment-method' : '/subscriptions/checkout',
+        { method: 'POST', body: JSON.stringify({ planId: plan.id, paymentMethodType: method, replaceBoleto: true }) },
+      );
+      window.location.href = result.url;
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);
@@ -297,6 +319,20 @@ export function CustomerDashboard() {
                           : cardActionLabel}
                     </button>
                     <p>Se a mensalidade não passou, o novo cartão é cobrado na hora.</p>
+                  </div>
+                )}
+                {isBoleto && (
+                  <div className="card-change">
+                    <h3>Pagar mensalidade</h3>
+                    <p>Use seu cadastro atual para pagar. Não é necessário se cadastrar novamente.</p>
+                    <button className="btn primary" type="button" disabled={busy || cardBusy} onClick={() => payBoletoWith('CREDIT_CARD')}>
+                      {busy ? 'Abrindo pagamento…' : 'Pagar com cartão'}
+                    </button>
+                    <p>O cartão será usado nas próximas mensalidades. Uma fatura em aberto será cobrada ao confirmar o cartão.</p>
+                    <button className="btn ghost" type="button" disabled={busy || cardBusy} onClick={() => payBoletoWith('PIX_RECURRING')}>
+                      {busy ? 'Abrindo pagamento…' : 'Pagar com PIX'}
+                    </button>
+                    <p>PIX de {money(PIX_MONTH_PRICE_CENTS)} por um mês, sem renovação automática. Após o pagamento, a assinatura por boleto será encerrada. Boletos anteriores em aberto devem ser conferidos com o atendimento.</p>
                   </div>
                 )}
                 {access?.renewed && (

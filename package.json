@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "node --test tests/*.test.mjs && vitest run tests/recovery-ui.test.tsx"
+    "test": "node --test tests/*.test.mjs && vitest run tests/recovery-ui.test.tsx tests/boleto-dashboard.test.tsx"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
