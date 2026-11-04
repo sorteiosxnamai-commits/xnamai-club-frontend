@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { CalendarDays, CheckCircle2, CreditCard, ReceiptText } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, money } from '../api/client';
-import { PIX_MONTH_PRICE_CENTS } from '../billing';
+import { pixMonthPriceCents } from '../billing';
 import { PublicHeader } from '../components/PublicHeader';
 
 type Invoice = {
@@ -288,7 +288,7 @@ export function CustomerDashboard() {
                 <div>
                   <small>PLANO ATUAL</small>
                   <h2>{subscription?.plan?.name || 'Sem plano'}</h2>
-                  <div className="big-number">{money(isPix ? PIX_MONTH_PRICE_CENTS : subscription?.plan?.monthlyPriceCents)}<small>/mês</small></div>
+                  <div className="big-number">{money(isPix ? pixMonthPriceCents(subscription?.plan?.code) : subscription?.plan?.monthlyPriceCents)}<small>/mês</small></div>
                 </div>
                 <div className="status-line"><CheckCircle2 /><span>Status</span><b>{statusText}</b></div>
                 <div className="status-line">
@@ -332,7 +332,7 @@ export function CustomerDashboard() {
                     <button className="btn ghost" type="button" disabled={busy || cardBusy} onClick={() => payBoletoWith('PIX_RECURRING')}>
                       {busy ? 'Abrindo pagamento…' : 'Pagar com PIX'}
                     </button>
-                    <p>PIX de {money(PIX_MONTH_PRICE_CENTS)} por um mês, sem renovação automática. Após o pagamento, a assinatura por boleto será encerrada. Boletos anteriores em aberto devem ser conferidos com o atendimento.</p>
+                    <p>PIX de {money(pixMonthPriceCents(subscription?.plan?.code))} por um mês, sem renovação automática. Após o pagamento, a assinatura por boleto será encerrada. Boletos anteriores em aberto devem ser conferidos com o atendimento.</p>
                   </div>
                 )}
                 {access?.renewed && (

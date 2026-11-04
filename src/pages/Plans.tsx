@@ -1,3 +1,4 @@
+import { usePageText } from '../content/ContentContext';
 import { useEffect, useState } from 'react';
 import { Check, Diamond } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +7,7 @@ import { useAuth } from '../auth/AuthContext';
 import { homePath } from '../auth/roles';
 import { PublicHeader } from '../components/PublicHeader';
 import { logAppEvent } from '../telemetry';
+import { asaasOffer } from '../asaas';
 
 export type Plan = {
   id: string;
@@ -15,6 +17,7 @@ export type Plan = {
   compareAtPriceCents?: number | null;
   purchaseLimitCents: number | null;
   description: string;
+  availability?: { capacity: number; remaining: number };
 };
 
 type CurrentSubscription = {
@@ -38,6 +41,13 @@ export function planBenefits(plan: Plan) {
 }
 
 export function PlanPrice({ plan }: { plan: Plan }) {
+  const offer = asaasOffer(plan.code);
+  if (offer) return <div className="price">
+    <span className="price-was">{money(offer.original)}/mês</span>
+    <span className="price-now">{money(offer.card)}<small>/mês no cartão</small></span>
+    <span className="launch-save">Lançamento: selecione a recorrência no aplicativo ou site.</span>
+    <span className="launch-save">No PIX: {money(offer.pix)}/mês no lançamento.</span>
+  </div>;
   const hasLaunchDeal = plan.compareAtPriceCents != null && plan.monthlyPriceCents != null;
   return (
     <div className="price">
@@ -52,6 +62,7 @@ export function PlanPrice({ plan }: { plan: Plan }) {
 }
 
 export function Plans() {
+  const t = usePageText('plans');
   const [plans, setPlans] = useState<Plan[]>([]);
   const [currentSubscription, setCurrentSubscription] = useState<CurrentSubscription | null>(null);
   const [error, setError] = useState('');
@@ -76,7 +87,7 @@ export function Plans() {
     <main className="public-page plans-page launch-plans">
       <div className="eyebrow">👑 PLANOS XNAMAI CLUB</div>
       <h1 className="center-title"><span>XNaMai</span> Club</h1>
-      <p className="center-subtitle">Basic para comprar melhor. Prioridade para pedir mais rápido.</p>
+      <p className="center-subtitle">{t("subtitle", "Basic para comprar melhor. Prioridade para pedir mais rápido.")}</p>
       {error && <div className="error-box" role="alert">{error}</div>}
       <div className="plans-grid">
         {plans.map((plan) => {
@@ -92,12 +103,13 @@ export function Plans() {
           <article className={`plan-card featured${priority ? ' priority-plan' : ' basic-plan'}`} key={plan.id}>
             <div className="recommended">{priority ? '⚡ FAST PASS — APENAS 50 VAGAS' : 'PLANO BASIC'}</div>
             <div className="plan-icon"><Diamond /></div>
-            <h3>{plan.name}</h3>
+            <h3>{asaasOffer(plan.code)?.name ?? plan.name}</h3>
             <PlanPrice plan={plan} />
+            <p>{t("eligibility", "Exclusivo para clientes lojistas com cadastro CNPJ.")}</p>
             <div className="plan-promise">
               <strong>{priority ? 'O Fast Pass da XNaMai' : 'Acesso aos preços exclusivos do XNaMai Club'}</strong>
               {priority && (
-                <p>Faça seu pedido com antecedência mínima de 6 horas para separação e envio no mesmo dia, dentro do nosso horário de operação.</p>
+                <p>{t("fastDescription", "Faça seu pedido com antecedência mínima de 6 horas para separação e envio no mesmo dia, dentro do nosso horário de operação.")}</p>
               )}
             </div>
             <div className={`plan-speed${priority ? ' fast' : ''}`}>
@@ -106,26 +118,26 @@ export function Plans() {
               <small>antecedência mínima</small>
             </div>
             <ul>
-              {planBenefits(plan).map((benefit) => <li key={benefit}><Check /> {benefit}</li>)}
+              {planBenefits(plan).map((benefit, index) => <li key={index}><Check /> {t(`${plan.code}Benefit${index}`, benefit)}</li>)}
             </ul>
             {priority && (
               <>
                 <div className="plan-capacity">
                   <strong>🔒 APENAS 50 CLIENTES</strong>
-                  <p>O Plano Prioridade é limitado a 50 clientes para garantir que a prioridade realmente funcione.</p>
+                  <p>{t("capacity", "O Plano Prioridade é limitado a 50 clientes para garantir que a prioridade realmente funcione.")}</p>
                 </div>
                 <div className="plan-lab">
                   <strong>🔬 XNaMai Lab</strong>
-                  <p><b>Grupo exclusivo para até 50 membros.</b> Receba catálogos de novos produtos e participe da escolha dos produtos que poderão entrar no site da XNaMai conforme a demanda.</p>
+                  <p><b>{t("labIntro", "Grupo exclusivo para até 50 membros.")}</b>{t("labDescription", " Receba catálogos de novos produtos e participe da escolha dos produtos que poderão entrar no site da XNaMai conforme a demanda.")}</p>
                 </div>
               </>
             )}
             <button
               className="btn primary"
-              disabled={current || included}
+              disabled={current || included || (priority && plan.availability?.remaining === 0)}
               onClick={() => choose(plan)}
             >
-              {current ? 'PLANO ATUAL' : included ? 'INCLUSO NO PLANO ATUAL' : upgrade ? 'FAZER UPGRADE' : priority ? 'QUERO O PRIORIDADE' : 'ASSINAR BASIC'}
+              {current ? 'PLANO ATUAL' : included ? 'INCLUSO NO PLANO ATUAL' : priority && plan.availability?.remaining === 0 ? 'VAGAS ESGOTADAS' : upgrade ? 'FAZER UPGRADE' : priority ? 'QUERO O FAST PASS' : 'ASSINAR BASIC'}
             </button>
           </article>
           );

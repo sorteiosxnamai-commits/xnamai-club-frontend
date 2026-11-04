@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { accessFor } from '../src/auth/roles.ts';
 
-test('the /atendimento route is public', () => {
-  const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
-  assert.match(app, /<Route path="\/atendimento" element=\{<Atendimento \/>\} \/>/);
-  assert.doesNotMatch(app, /path="\/atendimento" element=\{<Protected/);
+test('only admin and support can access atendimento', () => {
+  const allowed = ['ADMIN', 'SUPPORT'];
+  assert.deepEqual(accessFor(null, allowed), { kind: 'login' });
+  assert.deepEqual(accessFor({ role: 'CUSTOMER' }, allowed), { kind: 'redirect', to: '/app' });
+  assert.deepEqual(accessFor({ role: 'SUPPORT' }, allowed), { kind: 'allow' });
+  assert.deepEqual(accessFor({ role: 'ADMIN' }, allowed), { kind: 'allow' });
 });
 
 test('Protected delegates to accessFor (single RBAC decision)', () => {

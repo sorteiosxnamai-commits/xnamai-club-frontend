@@ -1,3 +1,4 @@
+import { usePageText } from '../content/ContentContext';
 import { useMemo, useState } from 'react';
 import { BarChart3, Calculator, Headphones, Percent, Star } from 'lucide-react';
 import { PublicHeader } from '../components/PublicHeader';
@@ -5,6 +6,7 @@ import { PublicHeader } from '../components/PublicHeader';
 const brl = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
 export function Simulator() {
+  const t = usePageText('simulator');
   const [spend, setSpend] = useState(55000);
   const calc = useMemo(() => ({ min: spend * .15, avg: spend * .20, max: spend * .25 }), [spend]);
   const recommended = 'Plano Lançamento';
@@ -13,21 +15,21 @@ export function Simulator() {
     <main className="public-page simulator-page">
       <section className="sim-heading">
         <div className="sim-icon"><Calculator/></div>
-        <div><div className="eyebrow">XNaMai Club › Simulador de economia</div><h1>Descubra quanto sua empresa pode economizar com o XNaMai Club</h1><p>Faixa média estimada entre 15% e 25% em compras elegíveis.</p></div>
+        <div><div className="eyebrow">XNaMai Club › Simulador de economia</div><h1>{t("title", "Descubra quanto sua empresa pode economizar com o XNaMai Club")}</h1><p>{t("subtitle", "Faixa média estimada entre 15% e 25% em compras elegíveis.")}</p></div>
       </section>
       <section className="sim-layout">
         <div className="panel sim-input">
-          <h2>Simule sua economia mensal</h2>
-          <label>Quanto sua empresa gasta por mês em compras?</label>
+          <h2>{t("inputTitle", "Simule sua economia mensal")}</h2>
+          <label>{t("inputLabel", "Quanto sua empresa gasta por mês em compras?")}</label>
           <div className="money-input">{brl(spend)}</div>
           <input type="range" min="1000" max="500000" step="1000" value={spend} onChange={e => setSpend(Number(e.target.value))}/>
           <div className="slider-labels"><span>R$ 1 mil</span><span>R$ 100 mil</span><span>R$ 250 mil</span><span>R$ 500 mil</span></div>
           <div className="info-line">Faixa estimada de economia do Club: <strong>15% a 25%</strong></div>
-          <button className="btn primary large full">Calcular economia</button>
+          <button className="btn primary large full">{t("cta", "Calcular economia")}</button>
           <div className="recommended-plan"><Star/><div><small>Plano recomendado</small><strong>{recommended}</strong></div></div>
         </div>
         <div className="panel sim-result">
-          <div className="result-title">Você pode economizar entre</div>
+          <div className="result-title">{t("resultTitle", "Você pode economizar entre")}</div>
           <div className="result-range">{brl(calc.min)} <small>e</small> {brl(calc.max)}</div>
           <div className="result-month">por mês</div>
           <div className="avg-box"><span>Economia média estimada</span><strong>{brl(calc.avg)}<small>/mês</small></strong></div>

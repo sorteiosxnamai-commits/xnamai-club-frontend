@@ -1,3 +1,4 @@
+import { isValidCnpj, formatCnpj } from '../cnpj';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { PublicHeader } from '../components/PublicHeader';
@@ -27,41 +28,6 @@ type FormFields = {
   email: string;
   password: string;
 };
-
-function formatCpfCnpj(value: string) {
-  const digits = value.replace(/\D/g, '').slice(0, 14);
-  if (digits.length <= 11) {
-    return digits
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-  }
-  return digits
-    .replace(/(\d{2})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1/$2')
-    .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
-}
-
-function isValidCpf(digits: string) {
-  if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false;
-  const check = (length: number) => {
-    const sum = digits.slice(0, length).split('').reduce((total, digit, index) => total + Number(digit) * (length + 1 - index), 0);
-    const rest = (sum * 10) % 11;
-    return (rest === 10 ? 0 : rest) === Number(digits[length]);
-  };
-  return check(9) && check(10);
-}
-
-function isValidCnpj(digits: string) {
-  if (digits.length !== 14 || /^(\d)\1+$/.test(digits)) return false;
-  const check = (weights: number[]) => {
-    const sum = weights.reduce((total, weight, index) => total + Number(digits[index]) * weight, 0);
-    const rest = sum % 11;
-    return (rest < 2 ? 0 : 11 - rest) === Number(digits[weights.length]);
-  };
-  return check([5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]) && check([6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
-}
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -115,8 +81,8 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
       if (form.name.trim().length < 2) nextFields.name = 'Informe seu nome completo.';
       if (form.city.trim().length < 2) nextFields.city = 'Informe a cidade.';
       if (!form.state) nextFields.state = 'Informe um estado válido.';
-      const digits = form.document.replace(/\D/g, '');
-      if (!isValidCpf(digits) && !isValidCnpj(digits)) nextFields.document = 'Informe um CPF ou CNPJ válido.';
+      if (!isValidCnpj(form.document)) nextFields.document = 'Informe um CNPJ válido. O Club é exclusivo para lojistas.';
+      if (form.companyName.trim().length < 2) nextFields.companyName = 'Informe o nome da empresa.';
     }
     if (!form.email.trim()) nextFields.email = 'Informe um e-mail válido.';
     if (mode === 'register' && form.password.length < 8) nextFields.password = 'A senha deve ter pelo menos 8 caracteres.';
@@ -165,6 +131,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
         <form className="auth-card" onSubmit={submit} noValidate>
           <div className="eyebrow">XNAMAI CLUB</div>
           <h1>{mode === 'login' ? 'Entrar na sua conta' : 'Crie sua conta'}</h1>
+          {mode === 'register' && <p>Cadastro exclusivo para lojistas com CNPJ. Informe o nome da empresa e um CNPJ válido.</p>}
           {error && (
             <div className="error-box" role="alert" aria-live="assertive" ref={errorRef}>
               {error}
@@ -185,7 +152,8 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
               </label>
               <label>
                 Empresa
-                <input value={form.companyName} onChange={(e) => update('companyName', e.target.value)} autoComplete="organization" />
+                <input value={form.companyName} onChange={(e) => update('companyName', e.target.value)} autoComplete="organization" required maxLength={200} />
+                <FieldError message={fieldErrors.companyName} />
               </label>
               <div className="two-cols">
                 <label>
@@ -216,14 +184,15 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' }) {
                 </label>
               </div>
               <label>
-                CNPJ ou CPF
+                CNPJ da empresa
                 <input
                   className={fieldErrors.document ? 'invalid' : ''}
                   value={form.document}
-                  onChange={(e) => update('document', formatCpfCnpj(e.target.value))}
-                  inputMode="numeric"
+                  onChange={(e) => update('document', formatCnpj(e.target.value))}
+                  inputMode="text"
                   autoComplete="off"
-                  placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                  placeholder="00.000.000/0000-00"
+                  maxLength={18}
                   required
                 />
                 <FieldError message={fieldErrors.document} />

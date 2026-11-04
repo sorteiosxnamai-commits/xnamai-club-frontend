@@ -28,6 +28,7 @@ type AuthContextType = {
   loading: boolean;
   login(email: string, password: string): Promise<User>;
   register(input: RegisterInput): Promise<User>;
+  updateBusiness(input: { companyName: string; document: string }): Promise<User>;
   logout(): void;
 };
 
@@ -64,7 +65,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
-  return <AuthContext.Provider value={{ user, loading, login, register, logout }}>{children}</AuthContext.Provider>;
+  async function updateBusiness(input: { companyName: string; document: string }) {
+    const result = await api<{ user: User }>('/auth/business', { method: 'PATCH', body: JSON.stringify(input) });
+    setUser(result.user);
+    return result.user;
+  }
+
+  return <AuthContext.Provider value={{ user, loading, login, register, updateBusiness, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

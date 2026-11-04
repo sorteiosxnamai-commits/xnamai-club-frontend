@@ -60,6 +60,7 @@ export function PublicHeader() {
           Catálogo
         </a>
         {user?.role === 'CUSTOMER' && <NavLink to="/app">Minha conta</NavLink>}
+        {user?.role === 'CUSTOMER' && <NavLink to="/app/cadastro-empresa">Dados da empresa</NavLink>}
         {user?.role === 'ADMIN' && <NavLink to="/admin">Admin</NavLink>}
         <div className="nav-drawer-actions">
           {!user ? (

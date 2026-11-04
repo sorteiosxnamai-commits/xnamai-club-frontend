@@ -1,3 +1,4 @@
+import { isValidCnpj, formatCnpj } from '../cnpj';
 import { useEffect, useMemo, useState } from 'react';
 import { Headset, RefreshCw } from 'lucide-react';
 import { api, money } from '../api/client';
@@ -45,6 +46,7 @@ type DeskPayload = {
 
 function formatDocument(value?: string | null) {
   if (!value) return '';
+  if (isValidCnpj(value)) return formatCnpj(value);
   const digits = value.replace(/\D/g, '');
   if (digits.length === 11) return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   if (digits.length === 14) return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');

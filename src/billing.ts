@@ -1,1 +1,5 @@
-export const PIX_MONTH_PRICE_CENTS = 19997;
+import { asaasOffer } from './asaas';
+
+export function pixMonthPriceCents(code?: string) {
+  return code ? asaasOffer(code)?.pix ?? null : null;
+}

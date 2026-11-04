@@ -16,6 +16,7 @@ type Metrics = {
   nextMonthForecastCents: number;
   yearForecastCents: number;
   forecastSubscribers: number;
+  unpricedSubscribers?: number;
   forecastByMonth: MonthRevenue[];
 };
 
@@ -37,6 +38,7 @@ export function AdminDashboard() {
       />
       {error && <div className="error-box">{error}</div>}
       {!metrics && !error && <p className="admin-loading">Carregando métricas reais…</p>}
+      {!!metrics?.unpricedSubscribers && <p role="status">{metrics.unpricedSubscribers} contratos aguardam conferência do valor recorrente e não foram incluídos na previsão.</p>}
       {metrics && <DashboardBody metrics={metrics} />}
     </>
   );

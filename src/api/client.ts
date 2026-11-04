@@ -14,7 +14,7 @@ export type ApiErrorBody = {
 export class ApiRequestError extends Error {
   fields: Record<string, string>;
 
-  constructor(message: string, fields: Record<string, string> = {}) {
+  constructor(message: string, fields: Record<string, string> = {}, public status?: number) {
     super(message);
     this.name = 'ApiRequestError';
     this.fields = fields;
@@ -55,6 +55,7 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     throw new ApiRequestError(
       messageFromBody(data, 'Não foi possível concluir. Tente novamente.'),
       fieldErrorsFromBody(data),
+      response.status,
     );
   }
   return data as T;

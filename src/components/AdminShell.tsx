@@ -10,7 +10,8 @@ function AdminNav() {
       <NavLink to="/admin/assinaturas"><Repeat />Assinaturas</NavLink>
       <NavLink to="/admin/cobrancas"><ReceiptText />Cobranças</NavLink>
       <NavLink to="/admin/clientes"><Users />Clientes</NavLink>
-      <NavLink to="/admin/logs"><ScrollText />Logs Vercel</NavLink>
+      <NavLink to="/atendimento"><Users />Atendimento</NavLink>
+      <NavLink to="/admin/conteudo"><ScrollText />Textos e telas</NavLink>
     </>
   );
 }

@@ -19,6 +19,7 @@ type PaymentsPayload = {
   nextMonthForecastCents: number;
   yearForecastCents: number;
   forecastSubscribers: number;
+  unpricedSubscribers?: number;
   forecastByMonth: MonthRevenue[];
   upcoming: PaymentRow[];
   invoices: PaymentRow[];
@@ -40,6 +41,7 @@ export function AdminPayments() {
       />
       {error && <div className="error-box">{error}</div>}
       {!data && !error && <p className="admin-loading">Carregando cobranças…</p>}
+      {!!data?.unpricedSubscribers && <p role="status">{data.unpricedSubscribers} contratos aguardam conferência do valor recorrente e não foram incluídos na previsão.</p>}
       {data && (
         <>
           <section className="kpi-grid forecast-kpis">

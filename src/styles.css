@@ -16,12 +16,6 @@
 .auth-card .two-cols label{margin-top:12px}
 .logs-toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 4px}
 .logs-panel .forecast-copy{margin-top:12px}
-.vercel-log{margin:12px 0 0;padding:16px;border-radius:10px;background:#040910;border:1px solid #1a2d49;max-height:62vh;overflow:auto;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#c9d7ee;white-space:pre-wrap}
-.vercel-log-line{display:block;padding:2px 0}
-.vercel-log-line em{color:#6f829e;font-style:normal;margin-right:10px}
-.vercel-log-line b{color:#4b97ff;font-weight:700;margin-right:10px}
-.vercel-log-line.error{color:#ffb7b7}
-.vercel-log-line.warn{color:#f0c56e}
 .desk-search{display:grid;gap:8px;margin:18px 0 8px;color:#dfe8f5;font-size:13px;font-weight:700;max-width:520px}
 .desk-search input{padding:13px;border-radius:8px;border:1px solid #2a3b59;background:#07101d;color:#fff;outline:none;font-weight:500}
 .desk-search input:focus{border-color:#2178ff}
@@ -235,3 +229,17 @@ body.nav-locked{overflow:hidden}
   .card-change{grid-column:1;align-items:flex-start}
   .card-change p{text-align:left}
 }
+.content-toolbar{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap}
+.content-toolbar label,.content-fields label{display:grid;gap:8px;font-size:14px;color:#b8c9e4}
+.content-toolbar select,.content-fields textarea{font:inherit;color:#edf4ff;background:#09182c;border:1px solid #36527a;border-radius:8px;padding:12px;width:100%}
+.content-toolbar select{min-width:180px}
+.content-actions{display:flex;gap:10px;flex-wrap:wrap}
+.content-note{font-size:14px;color:#b0bed3;margin:16px 0}
+.content-fields,.content-preview,.content-history{margin-top:20px}
+.content-fields{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.content-fields h2{grid-column:1/-1}
+.content-fields textarea{resize:vertical;min-height:78px;line-height:1.6}
+.content-fields textarea:focus,.content-toolbar select:focus{outline:2px solid #428bff;outline-offset:2px}
+.content-preview iframe{width:100%;height:650px;border:1px solid #36527a;border-radius:12px;background:#070d19}
+.content-history li{margin:10px 0;color:#b0bed3;overflow-wrap:anywhere}
+@media(max-width:760px){.content-fields{grid-template-columns:1fr}.content-actions{width:100%}.content-preview iframe{height:520px}}
