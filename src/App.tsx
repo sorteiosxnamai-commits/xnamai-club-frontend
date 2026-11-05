@@ -40,7 +40,7 @@ export default function App() {
               <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
               <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
               <Route path="/cadastro" element={<AuthPage mode="register" />} />
-              <Route path="/atendimento" element={<Protected roles={['ADMIN', 'SUPPORT']}><Atendimento /></Protected>} />
+              <Route path="/atendimento" element={<Atendimento />} />
               <Route path="/admin/previa/:screen" element={<Protected role="ADMIN"><ContentPreview /></Protected>} />
               <Route path="/checkout" element={<Protected role="CUSTOMER"><Checkout /></Protected>} />
               <Route path="/confirmacao" element={<Protected role="CUSTOMER"><Confirmation /></Protected>} />
