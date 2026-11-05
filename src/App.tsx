@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import { Protected } from './components/Protected';
 import { AdminShell } from './components/AdminShell';
@@ -41,6 +41,7 @@ export default function App() {
               <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
               <Route path="/cadastro" element={<AuthPage mode="register" />} />
               <Route path="/atendimento" element={<Atendimento />} />
+              <Route path="/atendimentos" element={<Navigate to="/atendimento" replace />} />
               <Route path="/admin/previa/:screen" element={<Protected role="ADMIN"><ContentPreview /></Protected>} />
               <Route path="/checkout" element={<Protected role="CUSTOMER"><Checkout /></Protected>} />
               <Route path="/confirmacao" element={<Protected role="CUSTOMER"><Confirmation /></Protected>} />
