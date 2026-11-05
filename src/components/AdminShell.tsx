@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { LayoutDashboard, LogOut, ReceiptText, Repeat, ScrollText, Users } from 'lucide-react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { Brand } from './Brand';
@@ -37,14 +38,17 @@ export function AdminShell() {
   );
 }
 
-export function AdminHeader({ title, subtitle }: { title: string; subtitle: string }) {
+export function AdminHeader({ title, subtitle, action }: { title: string; subtitle: string; action?: ReactNode }) {
   return (
     <header className="admin-header">
       <div>
         <h1>{title}</h1>
         <p>{subtitle}</p>
       </div>
-      <span className="admin-chip">Admin XNaMai</span>
+      <div className="admin-header-side">
+        {action}
+        <span className="admin-chip">Admin XNaMai</span>
+      </div>
     </header>
   );
 }

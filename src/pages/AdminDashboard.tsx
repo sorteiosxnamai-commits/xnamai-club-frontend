@@ -56,7 +56,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
   return (
     <>
       <section className="kpi-grid">
-        <Kpi icon={<Users />} title="Assinantes ativos" value={String(metrics.activeSubscribers)} note="Base ativa do clube" />
+        <Kpi icon={<Users />} title="Assinantes ativos" value={String(metrics.activeSubscribers)} note="Na Stripe, o mesmo conjunto da MRR" />
         <Kpi
           icon={<CheckCircle2 />}
           title="Adimplência"
@@ -74,9 +74,9 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
         />
         <Kpi
           icon={<BadgeDollarSign />}
-          title="Receita mensal"
+          title="MRR"
           value={money(metrics.monthlyRevenueCents)}
-          note="Receita recebida neste mês"
+          note="Mensalidade recorrente na Stripe"
           positive={metrics.monthlyRevenueCents > 0}
         />
         <Kpi
@@ -91,7 +91,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
       <section className="admin-grid">
         <div className="panel chart-card">
           <div className="section-title">
-            <h2>Receita mensal</h2>
+            <h2>MRR</h2>
             <strong>{money(metrics.monthlyRevenueCents)}</strong>
           </div>
           <RevenueBars months={months} />
@@ -106,7 +106,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
               : growing
                 ? 'O clube cresceu em receita frente ao mês anterior.'
                 : shrinking
-                  ? 'A receita deste mês ficou abaixo do período anterior.'
+                  ? 'A MRR ficou abaixo do fim do mês anterior.'
                   : 'Os números abaixo refletem as cobranças já confirmadas.'}
           </p>
         </div>
@@ -117,7 +117,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
             <h2>Previsão de receita — 12 meses</h2>
             <strong>{money(metrics.yearForecastCents)}</strong>
           </div>
-          <p className="forecast-copy">Com base nas assinaturas ativas, cada mês seguinte repete a mensalidade corrente.</p>
+          <p className="forecast-copy">Repete a MRR atual da Stripe. Entram assinaturas ativas e em atraso; ficam de fora teste, pausa e canceladas.</p>
           <RevenueBars months={forecastMonths} className="forecast-chart" />
         </div>
         <div className="panel admin-positive">
@@ -135,7 +135,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
         <div>
           <BadgeDollarSign />
           <span>
-            <b>{metrics.monthlyRevenueCents > 0 ? 'Receita no mês' : 'Sem receita neste mês'}</b>
+            <b>{metrics.monthlyRevenueCents > 0 ? 'MRR atual' : 'Sem MRR'}</b>
             {money(metrics.monthlyRevenueCents)} recebidos
           </span>
         </div>

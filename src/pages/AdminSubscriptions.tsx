@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { Download } from 'lucide-react';
 import { api, money } from '../api/client';
 import { AdminHeader } from '../components/AdminShell';
 import { StatusBadge, formatDate, subscriptionStatusLabel } from './adminShared';
+import { downloadSubscribersCsv } from './subscribers-csv';
 
 type AdminSubscription = {
   id: string;
@@ -9,8 +11,9 @@ type AdminSubscription = {
   startedAt?: string | null;
   currentPeriodEnd?: string | null;
   createdAt: string;
+  gatewaySubscriptionId?: string | null;
   plan?: { name?: string; monthlyPriceCents?: number | null } | null;
-  customer?: { name?: string; email?: string; companyName?: string | null } | null;
+  customer?: { name?: string; email?: string; companyName?: string | null; phone?: string | null } | null;
 };
 
 export function AdminSubscriptions() {
@@ -26,6 +29,11 @@ export function AdminSubscriptions() {
       <AdminHeader
         title="Assinaturas"
         subtitle="Planos ativos, pendentes e cancelados do XNaMai Club."
+        action={(
+          <button className="btn ghost" type="button" disabled={!rows?.length} onClick={() => rows && downloadSubscribersCsv(rows)}>
+            <Download size={16} /> Exportar CSV
+          </button>
+        )}
       />
       {error && <div className="error-box">{error}</div>}
       {!rows && !error && <p className="admin-loading">Carregando assinaturas…</p>}
