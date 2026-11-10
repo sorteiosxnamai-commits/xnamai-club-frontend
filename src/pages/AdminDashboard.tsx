@@ -12,6 +12,7 @@ type Metrics = {
   previousRevenueCents: number;
   growthPercent: number;
   newSubscribers: number;
+  sources?: string[];
   revenueByMonth: MonthRevenue[];
   nextMonthForecastCents: number;
   yearForecastCents: number;
@@ -19,6 +20,15 @@ type Metrics = {
   unpricedSubscribers?: number;
   forecastByMonth: MonthRevenue[];
 };
+
+function gatewayPhrase(sources?: string[]) {
+  const stripe = sources?.includes('stripe');
+  const asaas = sources?.includes('asaas');
+  if (stripe && asaas) return 'na Stripe e no Asaas';
+  if (asaas) return 'no Asaas';
+  if (stripe) return 'na Stripe';
+  return '';
+}
 
 const EMPTY_MONTHS: MonthRevenue[] = [];
 
@@ -47,6 +57,7 @@ export function AdminDashboard() {
 function DashboardBody({ metrics }: { metrics: Metrics }) {
   const months = metrics.revenueByMonth ?? EMPTY_MONTHS;
   const forecastMonths = metrics.forecastByMonth ?? EMPTY_MONTHS;
+  const gateways = gatewayPhrase(metrics.sources);
   const growing = metrics.growthPercent > 0;
   const shrinking = metrics.growthPercent < 0;
   const tone = growing ? 'ok' : shrinking ? 'warn' : 'neutral';
@@ -56,7 +67,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
   return (
     <>
       <section className="kpi-grid">
-        <Kpi icon={<Users />} title="Assinantes ativos" value={String(metrics.activeSubscribers)} note="Na Stripe, o mesmo conjunto da MRR" />
+        <Kpi icon={<Users />} title="Assinantes ativos" value={String(metrics.activeSubscribers)} note={gateways ? `${gateways[0].toUpperCase()}${gateways.slice(1)}, o mesmo conjunto da MRR` : 'Assinaturas ativas na base'} />
         <Kpi
           icon={<CheckCircle2 />}
           title="Adimplência"
@@ -76,7 +87,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
           icon={<BadgeDollarSign />}
           title="MRR"
           value={money(metrics.monthlyRevenueCents)}
-          note="Mensalidade recorrente na Stripe"
+          note={gateways ? `Mensalidade recorrente ${gateways}` : 'Cobranças confirmadas no mês'}
           positive={metrics.monthlyRevenueCents > 0}
         />
         <Kpi
@@ -117,7 +128,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
             <h2>Previsão de receita — 12 meses</h2>
             <strong>{money(metrics.yearForecastCents)}</strong>
           </div>
-          <p className="forecast-copy">Repete a MRR atual da Stripe. Entram assinaturas ativas e em atraso; ficam de fora teste, pausa e canceladas.</p>
+          <p className="forecast-copy">{gateways ? `Repete a MRR atual ${gateways}. Entram assinaturas ativas e em atraso; ficam de fora inativas, pausadas e canceladas.` : 'Projeção a partir das cobranças já confirmadas.'}</p>
           <RevenueBars months={forecastMonths} className="forecast-chart" />
         </div>
         <div className="panel admin-positive">

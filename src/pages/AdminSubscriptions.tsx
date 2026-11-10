@@ -12,6 +12,8 @@ type AdminSubscription = {
   currentPeriodEnd?: string | null;
   createdAt: string;
   gatewaySubscriptionId?: string | null;
+  provider?: 'stripe' | 'asaas' | null;
+  frequency?: string | null;
   plan?: { name?: string; monthlyPriceCents?: number | null } | null;
   customer?: { name?: string; email?: string; companyName?: string | null; phone?: string | null } | null;
 };
@@ -28,7 +30,7 @@ export function AdminSubscriptions() {
     <>
       <AdminHeader
         title="Assinaturas"
-        subtitle="Planos ativos, pendentes e cancelados do XNaMai Club."
+        subtitle="Planos da Stripe e do Asaas, ativos, pendentes e cancelados."
         action={(
           <button className="btn ghost" type="button" disabled={!rows?.length} onClick={() => rows && downloadSubscribersCsv(rows)}>
             <Download size={16} /> Exportar CSV
@@ -61,7 +63,10 @@ export function AdminSubscriptions() {
                     <div className="cell-muted">{row.customer?.email}</div>
                     {row.customer?.companyName && <div className="cell-muted">{row.customer.companyName}</div>}
                   </td>
-                  <td>{row.plan?.name || '—'}</td>
+                  <td>
+                    {row.plan?.name || '—'}
+                    <div className="cell-muted">{row.provider === 'asaas' ? 'Asaas' : 'Stripe'}</div>
+                  </td>
                   <td><StatusBadge status={row.status} labels={subscriptionStatusLabel} /></td>
                   <td>{money(row.plan?.monthlyPriceCents)}</td>
                   <td>{formatDate(row.startedAt || row.createdAt)}</td>

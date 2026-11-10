@@ -11,6 +11,7 @@ type PaymentRow = {
   dueDate?: string | null;
   paidAt?: string | null;
   createdAt?: string;
+  description?: string | null;
   plan?: { name?: string } | null;
   customer?: { name?: string; email?: string } | null;
 };
@@ -37,7 +38,7 @@ export function AdminPayments() {
     <>
       <AdminHeader
         title="Cobranças"
-        subtitle="Próximas renovações, previsão de receita e faturas já sincronizadas."
+        subtitle="Próximas renovações, previsão de receita e cobranças da Stripe e do Asaas."
       />
       {error && <div className="error-box">{error}</div>}
       {!data && !error && <p className="admin-loading">Carregando cobranças…</p>}
@@ -104,7 +105,7 @@ export function AdminPayments() {
                       <strong>{row.customer?.name || '—'}</strong>
                       <div className="cell-muted">{row.customer?.email}</div>
                     </td>
-                    <td>Mensalidade {row.plan?.name || 'XNaMai Club'}</td>
+                    <td>{row.description || `Mensalidade ${row.plan?.name || 'XNaMai Club'}`}</td>
                     <td><StatusBadge status={row.status} labels={invoiceStatusLabel} /></td>
                     <td>{money(row.amountCents)}</td>
                   </tr>
@@ -138,7 +139,7 @@ export function AdminPayments() {
                       <strong>{row.customer?.name || '—'}</strong>
                       <div className="cell-muted">{row.customer?.email}</div>
                     </td>
-                    <td>Mensalidade {row.plan?.name || 'XNaMai Club'}</td>
+                    <td>{row.description || `Mensalidade ${row.plan?.name || 'XNaMai Club'}`}</td>
                     <td><StatusBadge status={row.status} labels={invoiceStatusLabel} /></td>
                     <td>{money(row.amountCents)}</td>
                   </tr>

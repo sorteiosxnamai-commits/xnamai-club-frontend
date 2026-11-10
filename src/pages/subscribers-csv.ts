@@ -1,6 +1,7 @@
 export type SubscriberExportRow = {
   gatewaySubscriptionId?: string | null;
   currentPeriodEnd?: string | null;
+  frequency?: string | null;
   plan?: { name?: string; monthlyPriceCents?: number | null } | null;
   customer?: { name?: string; email?: string; phone?: string | null } | null;
 };
@@ -31,7 +32,7 @@ export function buildSubscribersCsv(rows: SubscriberExportRow[]) {
     row.customer?.phone || '',
     row.plan?.name || '',
     money(row.plan?.monthlyPriceCents),
-    row.gatewaySubscriptionId ? 'Mensal' : 'Avulsa',
+    row.frequency || (row.gatewaySubscriptionId ? 'Mensal' : 'Avulsa'),
     dateLabel(row.currentPeriodEnd),
   ].map(cell).join(';'));
   return `\uFEFF${[header.join(';'), ...lines].join('\n')}\n`;
