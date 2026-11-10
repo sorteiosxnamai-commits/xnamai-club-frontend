@@ -14,6 +14,7 @@ type Metrics = {
   newSubscribers: number;
   sources?: string[];
   revenueByMonth: MonthRevenue[];
+  oneTimeRevenueCents?: number;
   nextMonthForecastCents: number;
   yearForecastCents: number;
   forecastSubscribers: number;
@@ -67,7 +68,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
   return (
     <>
       <section className="kpi-grid">
-        <Kpi icon={<Users />} title="Assinantes ativos" value={String(metrics.activeSubscribers)} note={gateways ? `${gateways[0].toUpperCase()}${gateways.slice(1)}, o mesmo conjunto da MRR` : 'Assinaturas ativas na base'} />
+        <Kpi icon={<Users />} title="Assinantes ativos" value={String(metrics.activeSubscribers)} note="Com acesso agora, a mesma conta do atendimento" />
         <Kpi
           icon={<CheckCircle2 />}
           title="Adimplência"
@@ -102,9 +103,13 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
       <section className="admin-grid">
         <div className="panel chart-card">
           <div className="section-title">
-            <h2>MRR</h2>
-            <strong>{money(metrics.monthlyRevenueCents)}</strong>
+            <h2>Receita</h2>
+            <strong>{money(months[months.length - 1]?.revenueCents ?? metrics.monthlyRevenueCents)}</strong>
           </div>
+          <p className="forecast-copy">
+            Cada mês soma a MRR daquele momento e a receita avulsa paga nele.
+            {metrics.oneTimeRevenueCents ? ` Neste mês, ${money(metrics.oneTimeRevenueCents)} são avulsos.` : ''}
+          </p>
           <RevenueBars months={months} />
         </div>
         <div className={`panel admin-positive ${tone}`}>
