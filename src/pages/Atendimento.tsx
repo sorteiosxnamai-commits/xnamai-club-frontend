@@ -30,6 +30,7 @@ type DeskMember = {
     type?: string;
     cardBrand?: string | null;
     cardLastFour?: string | null;
+    provider?: string | null;
   } | null;
   cashback: {
     eligible: boolean;
@@ -91,13 +92,13 @@ function renewalContact(validUntil?: string | null) {
 
 function paymentLabel(method?: DeskMember['paymentMethod']) {
   if (!method?.type) return '';
+  let label = method.type;
   if (method.type === 'CREDIT_CARD') {
     const brand = method.cardBrand || 'Cartão';
-    return method.cardLastFour ? `${brand} •••• ${method.cardLastFour}` : brand;
-  }
-  if (method.type === 'PIX_RECURRING') return 'PIX';
-  if (method.type === 'BOLETO') return 'Boleto';
-  return method.type;
+    label = method.cardLastFour ? `${brand} •••• ${method.cardLastFour}` : brand;
+  } else if (method.type === 'PIX_RECURRING') label = 'PIX';
+  else if (method.type === 'BOLETO') label = 'Boleto';
+  return method.provider === 'asaas' ? `${label} · Asaas` : label;
 }
 
 function CustomerCells({ row, dash }: { row: DeskMember; dash: string }) {
@@ -343,8 +344,8 @@ export function Atendimento() {
                         {row.subscription
                           ? (
                             <>
-                              <span className={`badge ${row.subscription.active ? 'success' : 'danger'}`}>
-                                {row.subscription.active ? 'Ativo' : 'Inativo'}
+                              <span className={`badge ${row.subscription.active ? 'success' : row.subscription.status === 'PENDING' ? 'pending' : 'danger'}`}>
+                                {row.subscription.active ? 'Ativo' : row.subscription.status === 'PAST_DUE' ? 'Em atraso' : row.subscription.status === 'PENDING' ? 'Pendente' : 'Inativo'}
                               </span>
                               {row.subscription.status === 'CANCELLED' && (
                                 <div className="cell-muted">Cancelada</div>
