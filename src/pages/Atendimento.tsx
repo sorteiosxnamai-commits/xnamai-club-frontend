@@ -38,6 +38,16 @@ type DeskMember = {
     used: boolean;
     usedAt?: string | null;
   };
+  asaas?: {
+    status?: string;
+    active?: boolean;
+    validUntil?: string | null;
+    renewed?: boolean;
+    renewedAt?: string | null;
+    boleto?: boolean;
+    plan?: { name?: string; monthlyPriceCents?: number | null } | null;
+    paymentMethod?: DeskMember['paymentMethod'];
+  } | null;
 };
 
 type DeskPayload = {
@@ -99,6 +109,74 @@ function paymentLabel(method?: DeskMember['paymentMethod']) {
   } else if (method.type === 'PIX_RECURRING') label = 'PIX';
   else if (method.type === 'BOLETO') label = 'Boleto';
   return method.provider === 'asaas' ? `${label} · Asaas` : label;
+}
+
+function statusBadge(subscription?: { active?: boolean; status?: string } | null) {
+  if (!subscription) return <span className="badge pending">Sem assinatura</span>;
+  if (subscription.active) return <span className="badge success">Ativo</span>;
+  if (subscription.status === 'PAST_DUE') return <span className="badge danger">Em atraso</span>;
+  if (subscription.status === 'PENDING') return <span className="badge pending">Pendente</span>;
+  if (subscription.status === 'CANCELLED') return <span className="badge danger">Cancelada</span>;
+  return <span className="badge danger">Inativo</span>;
+}
+
+function PlanSources({ row }: { row: DeskMember }) {
+  return (
+    <>
+      <div>
+        <div className="cell-muted">Stripe</div>
+        <strong>{row.subscription?.plan?.name || 'Sem assinatura'}</strong>
+        {row.subscription?.plan?.monthlyPriceCents != null && (
+          <div className="cell-muted">{money(row.subscription.plan.monthlyPriceCents)}{copy.perMonth}</div>
+        )}
+        {paymentLabel(row.paymentMethod) && <div className="cell-muted">{paymentLabel(row.paymentMethod)}</div>}
+      </div>
+      <div className="source-block">
+        <div className="cell-muted">Asaas</div>
+        <strong>{row.asaas?.plan?.name || 'Sem assinatura'}</strong>
+        {row.asaas?.plan?.monthlyPriceCents != null && (
+          <div className="cell-muted">{money(row.asaas.plan.monthlyPriceCents)}{copy.perMonth}</div>
+        )}
+        {row.asaas?.paymentMethod && <div className="cell-muted">{paymentLabel(row.asaas.paymentMethod)}</div>}
+      </div>
+    </>
+  );
+}
+
+function StatusSources({ row }: { row: DeskMember }) {
+  return (
+    <>
+      <div>
+        <div className="cell-muted">Stripe</div>
+        {statusBadge(row.subscription)}
+      </div>
+      <div className="source-block">
+        <div className="cell-muted">Asaas</div>
+        {statusBadge(row.asaas)}
+      </div>
+    </>
+  );
+}
+
+function UntilSources({ row }: { row: DeskMember }) {
+  return (
+    <>
+      <div>
+        <div className="cell-muted">Stripe</div>
+        {row.subscription?.validUntil ? formatDate(row.subscription.validUntil) : copy.dash}
+        {row.subscription?.renewed && (
+          <div><span className="badge success">Renovado em {formatDate(row.subscription.renewedAt)}</span></div>
+        )}
+      </div>
+      <div className="source-block">
+        <div className="cell-muted">Asaas</div>
+        {row.asaas?.validUntil ? formatDate(row.asaas.validUntil) : copy.dash}
+        {row.asaas?.renewed && (
+          <div><span className="badge success">Renovado em {formatDate(row.asaas.renewedAt)}</span></div>
+        )}
+      </div>
+    </>
+  );
 }
 
 function CustomerCells({ row, dash }: { row: DeskMember; dash: string }) {
@@ -194,7 +272,7 @@ export function Atendimento() {
   const boletoCount = data?.joined.filter((row) => row.boleto).length ?? 0;
   const available = data?.joined.filter((row) => row.cashback.eligible && !row.cashback.used).length ?? 0;
   const used = data?.joined.filter((row) => row.cashback.used).length ?? 0;
-  const active = data?.joined.filter((row) => row.subscription?.active).length ?? 0;
+  const active = data?.joined.filter((row) => row.subscription?.active || row.asaas?.active).length ?? 0;
 
   async function markCashbackUsed(member: DeskMember) {
     if (member.cashback.used || !member.cashback.eligible || savingId) return;
@@ -331,35 +409,9 @@ export function Atendimento() {
                   {joined.map((row) => (
                     <tr key={row.id}>
                       <CustomerCells row={row} dash={copy.dash} />
-                      <td>
-                        <strong>{row.subscription?.plan?.name || 'Sem plano'}</strong>
-                        {row.subscription?.plan?.monthlyPriceCents != null && (
-                          <div className="cell-muted">{money(row.subscription.plan.monthlyPriceCents)}{copy.perMonth}</div>
-                        )}
-                        {paymentLabel(row.paymentMethod) && (
-                          <div className="cell-muted">{paymentLabel(row.paymentMethod)}</div>
-                        )}
-                      </td>
-                      <td>
-                        {row.subscription
-                          ? (
-                            <>
-                              <span className={`badge ${row.subscription.active ? 'success' : row.subscription.status === 'PENDING' ? 'pending' : 'danger'}`}>
-                                {row.subscription.active ? 'Ativo' : row.subscription.status === 'PAST_DUE' ? 'Em atraso' : row.subscription.status === 'PENDING' ? 'Pendente' : 'Inativo'}
-                              </span>
-                              {row.subscription.status === 'CANCELLED' && (
-                                <div className="cell-muted">Cancelada</div>
-                              )}
-                            </>
-                          )
-                          : <span className="badge pending">Sem assinatura</span>}
-                      </td>
-                      <td>
-                        {row.subscription?.validUntil ? formatDate(row.subscription.validUntil) : copy.dash}
-                        {row.subscription?.renewed && (
-                          <div><span className="badge success">Renovado em {formatDate(row.subscription.renewedAt)}</span></div>
-                        )}
-                      </td>
+                      <td><PlanSources row={row} /></td>
+                      <td><StatusSources row={row} /></td>
+                      <td><UntilSources row={row} /></td>
                       <td>
                         {row.cashback.eligible ? (
                           <>
@@ -433,23 +485,14 @@ export function Atendimento() {
                     </tr>
                   )}
                   {boleto.map((row) => {
-                    const contact = renewalContact(row.subscription?.validUntil);
+                    const contactUntil = row.asaas?.boleto ? row.asaas.validUntil : row.subscription?.validUntil;
+                    const contact = renewalContact(contactUntil);
                     return (
                       <tr key={row.id}>
                         <CustomerCells row={row} dash={copy.dash} />
-                        <td>
-                          <strong>{row.subscription?.plan?.name || 'Sem plano'}</strong>
-                          {row.subscription?.plan?.monthlyPriceCents != null && (
-                            <div className="cell-muted">{money(row.subscription.plan.monthlyPriceCents)}{copy.perMonth}</div>
-                          )}
-                          <div className="cell-muted">Boleto</div>
-                        </td>
-                        <td>
-                          <span className={`badge ${row.subscription?.active ? 'success' : 'danger'}`}>
-                            {row.subscription?.active ? 'Ativo' : 'Inativo'}
-                          </span>
-                        </td>
-                        <td>{row.subscription?.validUntil ? formatDate(row.subscription.validUntil) : copy.dash}</td>
+                        <td><PlanSources row={row} /></td>
+                        <td><StatusSources row={row} /></td>
+                        <td><UntilSources row={row} /></td>
                         <td>
                           <span className={`badge ${contact.urgent ? 'danger' : 'pending'}`}>{contact.label}</span>
                         </td>
