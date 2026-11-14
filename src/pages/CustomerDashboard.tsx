@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { CalendarDays, CheckCircle2, CreditCard, ReceiptText } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, money } from '../api/client';
+import { asaasOffer } from '../asaas';
 import { pixMonthPriceCents } from '../billing';
 import { PublicHeader } from '../components/PublicHeader';
 
@@ -129,6 +130,8 @@ export function CustomerDashboard() {
   const pixMsLeft = pixExpiresAt ? new Date(pixExpiresAt).getTime() - Date.now() : null;
   const pixExpired = Boolean(isPix && pixMsLeft != null && pixMsLeft <= 0);
   const pixSoon = Boolean(isPix && pixMsLeft != null && pixMsLeft > 0 && pixMsLeft <= 7 * 24 * 60 * 60 * 1000);
+  const renewalOffer = asaasOffer(subscription?.plan?.code === 'PRIORITY' ? 'PRIORITY' : 'LAUNCH');
+  const canPayAgain = Boolean(data) && !accessActive && Boolean(renewalOffer);
 
   async function cancelSubscription() {
     if (!subscription?.id || busy) return;
@@ -197,6 +200,27 @@ export function CustomerDashboard() {
       sessionStorage.setItem('selected_plan', JSON.stringify(current));
       sessionStorage.setItem('checkout_method', 'PIX_RECURRING');
       navigate('/checkout');
+    } catch (e) {
+      setError((e as Error).message);
+      setBusy(false);
+    }
+  }
+
+  async function payWithAsaas(method: 'CREDIT_CARD' | 'BOLETO' | 'PIX') {
+    if (busy || cardBusy) return;
+    setBusy(true);
+    setError('');
+    setSuccess('');
+    try {
+      const code = subscription?.plan?.code === 'PRIORITY' ? 'PRIORITY' : 'LAUNCH';
+      const offer = asaasOffer(code);
+      const result = await api<{ url: string }>('/subscriptions/payment-link', {
+        method: 'POST',
+        body: JSON.stringify({ code, method }),
+      });
+      const allowed = [offer?.cardUrl, offer?.boletoUrl, offer?.pixUrl];
+      if (!allowed.includes(result.url)) throw new Error('Link de pagamento inválido.');
+      window.location.assign(result.url);
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);
@@ -321,7 +345,23 @@ export function CustomerDashboard() {
                     <p>Se a mensalidade não passou, o novo cartão é cobrado na hora.</p>
                   </div>
                 )}
-                {isBoleto && (
+                {canPayAgain && renewalOffer && (
+                  <div className="card-change">
+                    <h3>Pagar mensalidade</h3>
+                    <p>Escolha cartão, boleto ou PIX. O pagamento abre no Asaas, no cadastro que você já tem.</p>
+                    <button className="btn primary" type="button" disabled={busy || cardBusy} onClick={() => payWithAsaas('CREDIT_CARD')}>
+                      {busy ? 'Abrindo pagamento…' : `Pagar com cartão — ${money(renewalOffer.card)}`}
+                    </button>
+                    <button className="btn ghost" type="button" disabled={busy || cardBusy} onClick={() => payWithAsaas('BOLETO')}>
+                      {busy ? 'Abrindo pagamento…' : `Pagar com boleto — ${money(renewalOffer.boleto)}`}
+                    </button>
+                    <button className="btn ghost" type="button" disabled={busy || cardBusy} onClick={() => payWithAsaas('PIX')}>
+                      {busy ? 'Abrindo pagamento…' : `Pagar com PIX — ${money(renewalOffer.pix)}`}
+                    </button>
+                    <p>Cartão de {money(renewalOffer.card)}/mês. Boleto e PIX de {money(renewalOffer.pix)} neste mês.</p>
+                  </div>
+                )}
+                {isBoleto && accessActive && (
                   <div className="card-change">
                     <h3>Pagar mensalidade</h3>
                     <p>Use seu cadastro atual para pagar. Não é necessário se cadastrar novamente.</p>
@@ -386,7 +426,7 @@ export function CustomerDashboard() {
                     {isCancelled && (
                       <>
                         <p>Assinatura cancelada. O acesso aos preços exclusivos do Club foi encerrado.</p>
-                        <Link className="btn primary" to="/planos">Assinar novamente</Link>
+                        {!canPayAgain && <Link className="btn primary" to="/planos">Assinar novamente</Link>}
                       </>
                     )}
                   </div>

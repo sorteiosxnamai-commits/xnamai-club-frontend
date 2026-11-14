@@ -45,9 +45,9 @@ export function Checkout() {
   const isUpgrade = subscription?.status === 'ACTIVE' && Boolean(subscription.gatewaySubscriptionId)
     && subscription.plan?.code === 'LAUNCH' && plan.code === 'PRIORITY';
   const covered = Boolean(subscription?.currentPeriodEnd && new Date(subscription.currentPeriodEnd).getTime() > Date.now());
-  const inProgress = Boolean(subscription && (covered || subscription.status === 'PENDING'
+  const inProgress = Boolean(subscription && subscription.status !== 'CANCELLED' && (covered || subscription.status === 'PENDING'
     || (subscription.status === 'ACTIVE' && !subscription.currentPeriodEnd)
-    || (subscription.gatewaySubscriptionId && subscription.status !== 'CANCELLED')));
+    || subscription.gatewaySubscriptionId));
   if (!isUpgrade) return <AsaasCheckout code={plan.code} hasSubscription={inProgress} />;
 
   async function upgrade() {

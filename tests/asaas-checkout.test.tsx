@@ -18,6 +18,8 @@ for (const [code, card, pix, price] of [
     apiMock.mockImplementation(async (path: string) => path === '/auth/me' ? { document: '04252011000110', companyName: 'Loja Teste' } : null);
     render(<MemoryRouter><Checkout /></MemoryRouter>);
     expect((await screen.findByRole('link', { name: /Pagar.*Asaas/ })).getAttribute('href')).toBe(`https://www.asaas.com/000/c/${card}`);
+    await userEvent.click(screen.getByRole('button', { name: /Boleto/ }));
+    expect(screen.getByRole('link', { name: /Pagar.*Asaas/ }).getAttribute('href')).toBe(`https://www.asaas.com/000/c/${pix}`);
     await userEvent.click(screen.getByRole('button', { name: /PIX/ }));
     expect(screen.getByRole('link', { name: /Pagar.*Asaas/ }).getAttribute('href')).toBe(`https://www.asaas.com/000/c/${pix}`);
     expect(screen.getAllByText(new RegExp(price)).length).toBeGreaterThan(0);
@@ -25,6 +27,17 @@ for (const [code, card, pix, price] of [
     expect(screen.getByText(/confirmação.*atendimento/i)).toBeTruthy();
   });
 }
+
+test('a cancelled subscription can pay again by card, boleto, or pix', async () => {
+  sessionStorage.setItem('selected_plan', JSON.stringify({ id: 'plan', code: 'LAUNCH', name: 'Basic', monthlyPriceCents: 14997 }));
+  apiMock.mockImplementation(async (path: string) => path === '/auth/me'
+    ? { document: '04252011000110', companyName: 'Loja Teste' }
+    : { id: 'old', status: 'CANCELLED', currentPeriodEnd: new Date(Date.now() + 86400000).toISOString(), gatewaySubscriptionId: 'sub_old', plan: { code: 'LAUNCH' } });
+  render(<MemoryRouter><Checkout /></MemoryRouter>);
+  expect((await screen.findByRole('link', { name: /Pagar.*Asaas/ })).getAttribute('href')).toBe('https://www.asaas.com/000/c/dyt747auecm0y89b');
+  expect(screen.getByRole('button', { name: /Boleto/ })).toBeTruthy();
+  expect(screen.getByRole('button', { name: /PIX/ })).toBeTruthy();
+});
 
 test('an existing subscription does not expose a second payment link', async () => {
   sessionStorage.setItem('selected_plan', JSON.stringify({ id: 'plan', code: 'LAUNCH' }));
