@@ -9,24 +9,42 @@ vi.mock('../src/components/PublicHeader', () => ({ PublicHeader: () => <header>C
 vi.mock('../src/telemetry', () => ({ logAppEvent: vi.fn() }));
 import { Checkout } from '../src/pages/Checkout';
 afterEach(() => { cleanup(); sessionStorage.clear(); apiMock.mockReset(); });
-for (const [code, card, pix, price] of [
+for (const [code, card, boleto, price] of [
   ['LAUNCH', 'dyt747auecm0y89b', 'o1ec2qy62xy2osok', '199,99'],
   ['PRIORITY', 'h0k06a6rr4d00swi', 'dh2huehi75bvitg5', '349,99'],
 ]) {
-  test(`${code}: new subscription opens the correct Asaas links for each method`, async () => {
+  test(`${code}: card and boleto keep Asaas links, and PIX stays on this screen`, async () => {
     sessionStorage.setItem('selected_plan', JSON.stringify({ id: 'plan', code, name: code, monthlyPriceCents: 1 }));
     apiMock.mockImplementation(async (path: string) => path === '/auth/me' ? { document: '04252011000110', companyName: 'Loja Teste' } : null);
     render(<MemoryRouter><Checkout /></MemoryRouter>);
     expect((await screen.findByRole('link', { name: /Pagar.*Asaas/ })).getAttribute('href')).toBe(`https://www.asaas.com/000/c/${card}`);
     await userEvent.click(screen.getByRole('button', { name: /Boleto/ }));
-    expect(screen.getByRole('link', { name: /Pagar.*Asaas/ }).getAttribute('href')).toBe(`https://www.asaas.com/000/c/${pix}`);
-    await userEvent.click(screen.getByRole('button', { name: /PIX/ }));
-    expect(screen.getByRole('link', { name: /Pagar.*Asaas/ }).getAttribute('href')).toBe(`https://www.asaas.com/000/c/${pix}`);
+    expect(screen.getByRole('link', { name: /Pagar.*Asaas/ }).getAttribute('href')).toBe(`https://www.asaas.com/000/c/${boleto}`);
+    await userEvent.click(screen.getByRole('button', { name: /^PIX/ }));
+    expect(screen.queryByRole('link', { name: /Pagar.*Asaas/ })).toBeNull();
+    expect(screen.getByRole('button', { name: /Pagar com PIX/ })).toBeTruthy();
     expect(screen.getAllByText(new RegExp(price)).length).toBeGreaterThan(0);
     expect(apiMock.mock.calls.some(([, options]) => options?.method === 'POST')).toBe(false);
-    expect(screen.getByText(/confirmação.*atendimento/i)).toBeTruthy();
+    expect(screen.getByText(/confirma a assinatura automaticamente/i)).toBeTruthy();
   });
 }
+
+test('PIX shows the QR code and confirms the payment on this screen', async () => {
+  sessionStorage.setItem('selected_plan', JSON.stringify({ id: 'plan', code: 'LAUNCH', name: 'Basic', monthlyPriceCents: 14997 }));
+  apiMock.mockImplementation(async (path: string) => {
+    if (path === '/auth/me') return { document: '04252011000110', companyName: 'Loja Teste' };
+    if (path === '/subscriptions/me') return null;
+    if (path === '/subscriptions/pix') return { paymentId: 'pay_1', encodedImage: 'abc', payload: '000201', amountCents: 19999 };
+    if (path === '/subscriptions/pix/pay_1/confirm') return { paid: true, validUntil: '2026-12-16T15:00:00.000Z' };
+    return null;
+  });
+  render(<MemoryRouter><Checkout /></MemoryRouter>);
+  await userEvent.click(await screen.findByRole('button', { name: /^PIX/ }));
+  await userEvent.click(screen.getByRole('button', { name: /Pagar com PIX/ }));
+  expect((await screen.findByRole('img', { name: 'QR Code PIX' })).getAttribute('src')).toBe('data:image/png;base64,abc');
+  expect(await screen.findByText('Pagamento realizado.')).toBeTruthy();
+  expect(apiMock).toHaveBeenCalledWith('/subscriptions/pix', expect.objectContaining({ method: 'POST', body: JSON.stringify({ code: 'LAUNCH' }) }));
+});
 
 test('a cancelled subscription can pay again by card, boleto, or pix', async () => {
   sessionStorage.setItem('selected_plan', JSON.stringify({ id: 'plan', code: 'LAUNCH', name: 'Basic', monthlyPriceCents: 14997 }));

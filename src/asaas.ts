@@ -14,6 +14,19 @@ const offers = {
   },
 };
 
+const tironiTechPixUrl = {
+  LAUNCH: 'https://www.asaas.com/000/c/abss5rfg4vf41yac',
+  PRIORITY: 'https://www.asaas.com/000/c/c63rxqscnk2q6q6n',
+};
+
+/** PIX Tironi Tech Asaas. Unset means false, so PIX stays on the XNaMai account. */
+export const pixTironiTechAsaas = ['true', '1', 'yes', 'on'].includes(
+  String(import.meta.env.VITE_PIX_TIRONI_TECH_ASAAS ?? 'false').trim().toLowerCase(),
+);
+
 export function asaasOffer(code: string) {
-  return code === 'LAUNCH' || code === 'PRIORITY' ? offers[code] : null;
+  if (code !== 'LAUNCH' && code !== 'PRIORITY') return null;
+  const offer = offers[code];
+  if (!pixTironiTechAsaas) return offer;
+  return { ...offer, pixUrl: tironiTechPixUrl[code] };
 }
