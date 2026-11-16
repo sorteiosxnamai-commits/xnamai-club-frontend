@@ -44,6 +44,7 @@ type DeskMember = {
     validUntil?: string | null;
     renewed?: boolean;
     renewedAt?: string | null;
+    duplicateAt?: string | null;
     boleto?: boolean;
     plan?: { name?: string; monthlyPriceCents?: number | null } | null;
     paymentMethod?: DeskMember['paymentMethod'];
@@ -173,6 +174,9 @@ function UntilSources({ row }: { row: DeskMember }) {
         {row.asaas?.validUntil ? formatDate(row.asaas.validUntil) : copy.dash}
         {row.asaas?.renewed && (
           <div><span className="badge success">Renovado em {formatDate(row.asaas.renewedAt)}</span></div>
+        )}
+        {row.asaas?.duplicateAt && (
+          <div><span className="badge danger">Cobrança repetida em {formatDate(row.asaas.duplicateAt)}</span></div>
         )}
       </div>
     </>
