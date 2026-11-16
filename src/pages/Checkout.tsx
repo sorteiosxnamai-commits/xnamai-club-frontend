@@ -42,13 +42,17 @@ export function Checkout() {
     <Link className="btn primary" to="/app/cadastro-empresa">Informar CNPJ da empresa</Link>
     <Link className="btn ghost" to="/app">Minha conta</Link>
   </main></>;
-  const isUpgrade = subscription?.status === 'ACTIVE' && Boolean(subscription.gatewaySubscriptionId)
+  const pixBasicUpgrade = plan.code === 'PRIORITY'
+    && subscription?.plan?.code === 'LAUNCH'
+    && subscription.status !== 'CANCELLED'
+    && !subscription.gatewaySubscriptionId;
+  const isUpgrade = !pixBasicUpgrade && subscription?.status === 'ACTIVE' && Boolean(subscription.gatewaySubscriptionId)
     && subscription.plan?.code === 'LAUNCH' && plan.code === 'PRIORITY';
   const covered = Boolean(subscription?.currentPeriodEnd && new Date(subscription.currentPeriodEnd).getTime() > Date.now());
-  const inProgress = Boolean(subscription && subscription.status !== 'CANCELLED' && (covered || subscription.status === 'PENDING'
+  const inProgress = !pixBasicUpgrade && Boolean(subscription && subscription.status !== 'CANCELLED' && (covered || subscription.status === 'PENDING'
     || (subscription.status === 'ACTIVE' && !subscription.currentPeriodEnd)
     || subscription.gatewaySubscriptionId));
-  if (!isUpgrade) return <AsaasCheckout code={plan.code} hasSubscription={inProgress} />;
+  if (!isUpgrade) return <AsaasCheckout code={plan.code} hasSubscription={inProgress} upgrading={pixBasicUpgrade} />;
 
   async function upgrade() {
     if (busy || !plan) return;

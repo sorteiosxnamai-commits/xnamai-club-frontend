@@ -39,6 +39,17 @@ test('a cancelled subscription can pay again by card, boleto, or pix', async () 
   expect(screen.getByRole('button', { name: /PIX/ })).toBeTruthy();
 });
 
+test('an active Basic PIX month can upgrade to Fast Pass', async () => {
+  sessionStorage.setItem('selected_plan', JSON.stringify({ id: 'plan', code: 'PRIORITY', name: 'Fast Pass', monthlyPriceCents: 29797 }));
+  apiMock.mockImplementation(async (path: string) => path === '/auth/me'
+    ? { document: '04252011000110', companyName: 'Loja Teste' }
+    : { id: 'pix', status: 'ACTIVE', currentPeriodEnd: new Date(Date.now() + 86400000).toISOString(), gatewaySubscriptionId: null, plan: { code: 'LAUNCH' } });
+  render(<MemoryRouter><Checkout /></MemoryRouter>);
+  expect(await screen.findByText('Upgrade para o Plano Fast Pass')).toBeTruthy();
+  expect(screen.getByRole('link', { name: /Pagar.*Asaas/ }).getAttribute('href')).toBe('https://www.asaas.com/000/c/h0k06a6rr4d00swi');
+  expect(screen.queryByText('Você já possui uma assinatura em andamento')).toBeNull();
+});
+
 test('an existing subscription does not expose a second payment link', async () => {
   sessionStorage.setItem('selected_plan', JSON.stringify({ id: 'plan', code: 'LAUNCH' }));
   apiMock.mockImplementation(async (path: string) => path === '/auth/me' ? { document: '04252011000110', companyName: 'Loja Teste' } : { id: 'existing', status: 'ACTIVE', plan: { code: 'LAUNCH' } });

@@ -120,7 +120,7 @@ export function CustomerDashboard() {
   const canCancel = Boolean(subscription?.id) && !isCancelled && !cancelScheduled && !isPix;
   const canChangeCard = Boolean(subscription?.id) && !isCancelled && !isPix && !isBoleto;
   const cardActionLabel = data?.paymentMethod?.type === 'CREDIT_CARD' ? 'Trocar cartão' : 'Cadastrar cartão';
-  const canUpgrade = subscription?.status === 'ACTIVE' && !isPix && subscription.plan?.code === 'LAUNCH';
+  const canUpgrade = subscription?.status === 'ACTIVE' && subscription.plan?.code === 'LAUNCH';
   const validUntil = access?.validUntil || subscription?.currentPeriodEnd;
   const accessUntil = formatDate(validUntil);
   const accessActive = Boolean(subscription?.id) && (access ? access.active : subscription?.status === 'ACTIVE');

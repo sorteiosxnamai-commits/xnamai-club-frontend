@@ -6,7 +6,7 @@ import { asaasOffer } from '../asaas';
 import { api, money } from '../api/client';
 import { PublicHeader } from '../components/PublicHeader';
 
-export function AsaasCheckout({ code, hasSubscription }: { code: string; hasSubscription: boolean }) {
+export function AsaasCheckout({ code, hasSubscription, upgrading = false }: { code: string; hasSubscription: boolean; upgrading?: boolean }) {
   const t = usePageText('checkout');
   const [method, setMethod] = useState<'CREDIT_CARD' | 'BOLETO' | 'PIX'>('CREDIT_CARD');
   const [busy, setBusy] = useState(false);
@@ -33,7 +33,8 @@ export function AsaasCheckout({ code, hasSubscription }: { code: string; hasSubs
           <p>Para mudar o pagamento para o Asaas, fale com o atendimento e confirme a transição da assinatura atual antes de pagar novamente.</p>
           <Link className="btn primary" to="/app">Minha assinatura</Link>
         </div> : <section className="panel">
-          <h2>{offer.name}</h2>
+          <h2>{upgrading ? 'Upgrade para o Plano Fast Pass' : offer.name}</h2>
+          {upgrading && <p>O Plano Basic atual continua até o vencimento. Este pagamento inicia o Plano Fast Pass.</p>}
           <p>Valor original: <span className="price-was">{money(offer.original)}/mês</span></p>
           <p>{t("eligibility", "Oferta de lançamento exclusiva para lojistas com cadastro CNPJ.")}</p>
           <button type="button" aria-pressed={method === 'CREDIT_CARD'} className={`payment-option ${method === 'CREDIT_CARD' ? 'selected' : ''}`} onClick={() => setMethod('CREDIT_CARD')}>
