@@ -19,10 +19,8 @@ const tironiTechPixUrl = {
   PRIORITY: 'https://www.asaas.com/000/c/c63rxqscnk2q6q6n',
 };
 
-/** PIX Tironi Tech Asaas. Unset means false, so PIX stays on the XNaMai account. */
-export const pixTironiTechAsaas = ['true', '1', 'yes', 'on'].includes(
-  String(import.meta.env.VITE_PIX_TIRONI_TECH_ASAAS ?? 'false').trim().toLowerCase(),
-);
+/** PIX stays on the XNaMai Asaas account. Tironi Tech is not used for checkout. */
+export const pixTironiTechAsaas = false;
 
 export function asaasOffer(code: string) {
   if (code !== 'LAUNCH' && code !== 'PRIORITY') return null;
