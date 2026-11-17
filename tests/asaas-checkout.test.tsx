@@ -13,7 +13,7 @@ for (const [code, card, boleto, price] of [
   ['LAUNCH', 'dyt747auecm0y89b', 'o1ec2qy62xy2osok', '199,99'],
   ['PRIORITY', 'h0k06a6rr4d00swi', 'dh2huehi75bvitg5', '349,99'],
 ]) {
-  test(`${code}: card and boleto keep Asaas links, and PIX stays on this screen`, async () => {
+  test(`${code}: card, boleto, and PIX keep Asaas links`, async () => {
     sessionStorage.setItem('selected_plan', JSON.stringify({ id: 'plan', code, name: code, monthlyPriceCents: 1 }));
     apiMock.mockImplementation(async (path: string) => path === '/auth/me' ? { document: '04252011000110', companyName: 'Loja Teste' } : null);
     render(<MemoryRouter><Checkout /></MemoryRouter>);
@@ -21,30 +21,12 @@ for (const [code, card, boleto, price] of [
     await userEvent.click(screen.getByRole('button', { name: /Boleto/ }));
     expect(screen.getByRole('link', { name: /Pagar.*Asaas/ }).getAttribute('href')).toBe(`https://www.asaas.com/000/c/${boleto}`);
     await userEvent.click(screen.getByRole('button', { name: /^PIX/ }));
-    expect(screen.queryByRole('link', { name: /Pagar.*Asaas/ })).toBeNull();
-    expect(screen.getByRole('button', { name: /Pagar com PIX/ })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /Pagar com PIX no Asaas/ }).getAttribute('href')).toBe(`https://www.asaas.com/000/c/${boleto}`);
     expect(screen.getAllByText(new RegExp(price)).length).toBeGreaterThan(0);
     expect(apiMock.mock.calls.some(([, options]) => options?.method === 'POST')).toBe(false);
-    expect(screen.getByText(/confirma a assinatura automaticamente/i)).toBeTruthy();
+    expect(screen.getAllByText(/conferência pelo atendimento/i).length).toBeGreaterThan(0);
   });
 }
-
-test('PIX shows the QR code and confirms the payment on this screen', async () => {
-  sessionStorage.setItem('selected_plan', JSON.stringify({ id: 'plan', code: 'LAUNCH', name: 'Basic', monthlyPriceCents: 14997 }));
-  apiMock.mockImplementation(async (path: string) => {
-    if (path === '/auth/me') return { document: '04252011000110', companyName: 'Loja Teste' };
-    if (path === '/subscriptions/me') return null;
-    if (path === '/subscriptions/pix') return { paymentId: 'pay_1', encodedImage: 'abc', payload: '000201', amountCents: 19999 };
-    if (path === '/subscriptions/pix/pay_1/confirm') return { paid: true, validUntil: '2026-12-16T15:00:00.000Z' };
-    return null;
-  });
-  render(<MemoryRouter><Checkout /></MemoryRouter>);
-  await userEvent.click(await screen.findByRole('button', { name: /^PIX/ }));
-  await userEvent.click(screen.getByRole('button', { name: /Pagar com PIX/ }));
-  expect((await screen.findByRole('img', { name: 'QR Code PIX' })).getAttribute('src')).toBe('data:image/png;base64,abc');
-  expect(await screen.findByText('Pagamento realizado.')).toBeTruthy();
-  expect(apiMock).toHaveBeenCalledWith('/subscriptions/pix', expect.objectContaining({ method: 'POST', body: JSON.stringify({ code: 'LAUNCH' }) }));
-});
 
 test('a cancelled subscription can pay again by card, boleto, or pix', async () => {
   sessionStorage.setItem('selected_plan', JSON.stringify({ id: 'plan', code: 'LAUNCH', name: 'Basic', monthlyPriceCents: 14997 }));

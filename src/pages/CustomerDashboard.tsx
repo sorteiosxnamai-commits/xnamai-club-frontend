@@ -5,8 +5,6 @@ import { api, money } from '../api/client';
 import { asaasOffer } from '../asaas';
 import { pixMonthPriceCents } from '../billing';
 import { PublicHeader } from '../components/PublicHeader';
-import { PixQrPayment } from '../components/PixQrPayment';
-
 type Invoice = {
   id: string;
   createdAt: string;
@@ -213,14 +211,13 @@ export function CustomerDashboard() {
     setError('');
     setSuccess('');
     try {
-      if (method === 'PIX') return;
       const code = subscription?.plan?.code === 'PRIORITY' ? 'PRIORITY' : 'LAUNCH';
       const offer = asaasOffer(code);
       const result = await api<{ url: string }>('/subscriptions/payment-link', {
         method: 'POST',
         body: JSON.stringify({ code, method }),
       });
-      const allowed = [offer?.cardUrl, offer?.boletoUrl];
+      const allowed = [offer?.cardUrl, offer?.boletoUrl, offer?.pixUrl];
       if (!allowed.includes(result.url)) throw new Error('Link de pagamento inválido.');
       window.location.assign(result.url);
     } catch (e) {
@@ -357,11 +354,9 @@ export function CustomerDashboard() {
                     <button className="btn ghost" type="button" disabled={busy || cardBusy} onClick={() => payWithAsaas('BOLETO')}>
                       {busy ? 'Abrindo pagamento…' : `Pagar com boleto — ${money(renewalOffer.boleto)}`}
                     </button>
-                    <PixQrPayment
-                      code={subscription?.plan?.code === 'PRIORITY' ? 'PRIORITY' : 'LAUNCH'}
-                      label={`Pagar com PIX — ${money(renewalOffer.pix)}`}
-                      onPaid={() => { setSuccess('Pagamento realizado.'); void loadDashboard(); }}
-                    />
+                    <button className="btn ghost" type="button" disabled={busy || cardBusy} onClick={() => payWithAsaas('PIX')}>
+                      {busy ? 'Abrindo pagamento…' : `Pagar com PIX — ${money(renewalOffer.pix)}`}
+                    </button>
                     <p>Cartão de {money(renewalOffer.card)}/mês. Boleto e PIX de {money(renewalOffer.pix)} neste mês.</p>
                   </div>
                 )}

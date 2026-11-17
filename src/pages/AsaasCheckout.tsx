@@ -1,30 +1,28 @@
 import { usePageText } from '../content/ContentContext';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Barcode, CreditCard, QrCode } from 'lucide-react';
 import { asaasOffer } from '../asaas';
 import { api, money } from '../api/client';
 import { PublicHeader } from '../components/PublicHeader';
-import { PixQrPayment } from '../components/PixQrPayment';
 
 export function AsaasCheckout({ code, hasSubscription, upgrading = false }: { code: string; hasSubscription: boolean; upgrading?: boolean }) {
   const t = usePageText('checkout');
-  const navigate = useNavigate();
   const [method, setMethod] = useState<'CREDIT_CARD' | 'BOLETO' | 'PIX'>(() => (
     sessionStorage.getItem('checkout_method') === 'PIX_RECURRING' ? 'PIX' : 'CREDIT_CARD'
   ));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [paid, setPaid] = useState('');
   const offer = asaasOffer(code);
+  const href = offer ? method === 'CREDIT_CARD' ? offer.cardUrl : method === 'BOLETO' ? offer.boletoUrl : offer.pixUrl : '';
+  const payLabel = method === 'CREDIT_CARD' ? 'cartão' : method === 'BOLETO' ? 'boleto' : 'PIX';
   async function pay(event: React.MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
-    if (busy) return;
+    if (busy || !offer) return;
     setBusy(true); setError('');
     try {
       const result = await api<{ url: string }>('/subscriptions/payment-link', { method: 'POST', body: JSON.stringify({ code, method }) });
-      if (method === 'PIX') return;
-      const allowed = [offer?.cardUrl, offer?.boletoUrl];
+      const allowed = [offer.cardUrl, offer.boletoUrl, offer.pixUrl];
       if (!allowed.includes(result.url)) throw new Error('Link de pagamento inválido.');
       window.location.assign(result.url);
     } catch (error) { setError((error as Error).message); setBusy(false); }
@@ -54,14 +52,10 @@ export function AsaasCheckout({ code, hasSubscription, upgrading = false }: { co
           </button>
           <p><strong>Total: {money(method === 'CREDIT_CARD' ? offer.card : method === 'BOLETO' ? offer.boleto : offer.pix)}/mês</strong></p>
           <p>{t("instructions", "Você concluirá o pagamento no Asaas. Confira o plano, o valor e as condições antes de pagar.")}</p>
-          <p>{method === 'PIX' ? 'O QR Code aparece nesta tela. O pagamento confirma a assinatura automaticamente.' : t("confirmation", "A confirmação da assinatura no portal depende da conferência pelo atendimento. Use o mesmo CNPJ e e-mail do cadastro.")}</p>
-          {code === 'PRIORITY' && method !== 'PIX' && <p>A consulta reserva uma vaga por 32 minutos. A liberação definitiva depende da conferência pelo atendimento.</p>}
-          {code === 'PRIORITY' && method === 'PIX' && <p>A consulta reserva uma vaga por 32 minutos. O pagamento confirma a vaga.</p>}
-          {paid && <div className="success-box">{paid}</div>}
+          <p>{t("confirmation", "A confirmação da assinatura no portal depende da conferência pelo atendimento. Use o mesmo CNPJ e e-mail do cadastro.")}</p>
+          {code === 'PRIORITY' && <p>A consulta reserva uma vaga por 32 minutos. A liberação definitiva depende da conferência pelo atendimento.</p>}
           {error && <div className="error-box" role="alert">{error}</div>}
-          {method === 'PIX'
-            ? <PixQrPayment code={code} label={`Pagar com PIX — ${money(offer.pix)}`} onPaid={() => { setPaid('Pagamento realizado.'); navigate('/app'); }} />
-            : <a className="btn primary large" aria-disabled={busy} onClick={pay} href={method === 'CREDIT_CARD' ? offer.cardUrl : offer.boletoUrl}>{busy ? 'Conferindo disponibilidade…' : `Pagar com ${method === 'BOLETO' ? 'boleto' : 'cartão'} no Asaas`}</a>}
+          <a className="btn primary large" aria-disabled={busy} onClick={pay} href={href}>{busy ? 'Conferindo disponibilidade…' : `Pagar com ${payLabel} no Asaas`}</a>
         </section>}
     </main>
   </>;
