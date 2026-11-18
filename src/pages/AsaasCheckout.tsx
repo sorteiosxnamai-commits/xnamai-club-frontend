@@ -30,15 +30,16 @@ export function AsaasCheckout({ code, hasSubscription, upgrading = false }: { co
   return <>
     <PublicHeader />
     <main className="checkout-page">
-      <h1>{t("title", "Assinatura empresarial pelo Asaas")}</h1>
-      {!offer ? <div className="error-box" role="alert">Plano indisponível. <Link to="/planos">Escolha um plano.</Link></div>
+      <h1>{t("joinTitle", "Você está a um passo de ser sócio Xnamai")}</h1>
+      {!offer ? <div className="error-box" role="alert">Plano indisponível. <Link to="/planos">Escolha uma categoria.</Link></div>
         : hasSubscription ? <div className="panel">
-          <h2>Você já possui uma assinatura em andamento</h2>
-          <p>Para mudar o pagamento para o Asaas, fale com o atendimento e confirme a transição da assinatura atual antes de pagar novamente.</p>
-          <Link className="btn primary" to="/app">Minha assinatura</Link>
+          <h2>Você já possui uma participação em andamento</h2>
+          <p>Para mudar o pagamento para o Asaas, fale com o atendimento e confirme a transição da participação atual antes de pagar novamente.</p>
+          <Link className="btn primary" to="/app">Área do sócio</Link>
         </div> : <section className="panel">
-          <h2>{upgrading ? 'Upgrade para o Plano Fast Pass' : offer.name}</h2>
-          {upgrading && <p>O Plano Basic atual continua até o vencimento. Este pagamento inicia o Plano Fast Pass.</p>}
+          <h2>{upgrading ? 'Upgrade para Sócio Xnamai Prime' : offer.name}</h2>
+          {upgrading && <p>A categoria Sócio Xnamai continua até o vencimento. Este pagamento inicia o Sócio Xnamai Prime.</p>}
+          <p>Mensalidade recorrente da categoria escolhida. A renovação segue a forma de pagamento confirmada no Asaas. O cancelamento pode ser pedido na área do sócio.</p>
           <p>Valor original: <span className="price-was">{money(offer.original)}/mês</span></p>
           <p>{t("eligibility", "Oferta de lançamento exclusiva para lojistas com cadastro CNPJ.")}</p>
           <button type="button" aria-pressed={method === 'CREDIT_CARD'} className={`payment-option ${method === 'CREDIT_CARD' ? 'selected' : ''}`} onClick={() => setMethod('CREDIT_CARD')}>
@@ -55,7 +56,7 @@ export function AsaasCheckout({ code, hasSubscription, upgrading = false }: { co
           <p>{t("confirmation", "A confirmação da assinatura no portal depende da conferência pelo atendimento. Use o mesmo CNPJ e e-mail do cadastro.")}</p>
           {code === 'PRIORITY' && <p>A consulta reserva uma vaga por 32 minutos. A liberação definitiva depende da conferência pelo atendimento.</p>}
           {error && <div className="error-box" role="alert">{error}</div>}
-          <a className="btn primary large" aria-disabled={busy} onClick={pay} href={href}>{busy ? 'Conferindo disponibilidade…' : `Pagar com ${payLabel} no Asaas`}</a>
+          <a className="btn primary large" aria-disabled={busy} onClick={pay} href={href}>{busy ? 'Conferindo disponibilidade…' : `Confirmar adesão com ${payLabel} no Asaas`}</a>
         </section>}
     </main>
   </>;

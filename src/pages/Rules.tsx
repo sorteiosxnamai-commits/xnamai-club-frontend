@@ -17,12 +17,12 @@ import { PublicHeader } from '../components/PublicHeader';
 const rules = [
   {
     number: '01',
-    title: 'Assinatura',
+    title: 'Adesão ao clube',
     icon: Repeat,
     items: [
-      'O XNaMai Club possui planos de assinatura com benefícios e valores distintos, conforme o plano escolhido pelo cliente.',
-      'Plano Basic: R$ 149,97/mês no cartão durante o lançamento, selecionando recorrência no aplicativo ou site. Valor original: R$ 299,99/mês. No PIX: R$ 199,99/mês no lançamento.',
-      'Plano Prioridade: R$ 297,97/mês no cartão durante o lançamento (Fast Pass), selecionando recorrência no aplicativo ou site. Valor original: R$ 599,99/mês. No PIX: R$ 349,99/mês no lançamento.',
+      'O Club Xnamai tem duas categorias de sócio, com vantagens e mensalidades distintas.',
+      'Sócio Xnamai: R$ 149,97/mês no cartão durante o lançamento, selecionando recorrência no aplicativo ou site. Valor original: R$ 299,99/mês. No PIX: R$ 199,99/mês no lançamento.',
+      'Sócio Xnamai Prime: R$ 297,97/mês no cartão durante o lançamento, selecionando recorrência no aplicativo ou site. Valor original: R$ 599,99/mês. No PIX: R$ 349,99/mês no lançamento.',
       'Ambos os planos são exclusivos para clientes lojistas, com cadastro CNPJ.',
       'Novas adesões são pagas pelos links do Asaas. A confirmação no portal depende da conferência pelo atendimento.',
       'O acesso aos benefícios de cada plano permanece disponível enquanto a assinatura estiver ativa e regular.',
@@ -129,7 +129,7 @@ export function Rules() {
       <main className="public-page rules-page">
         <div className="eyebrow">REGRAS DO XNAMAI CLUB</div>
         <h1 className="center-title"><span>Regras</span> do clube</h1>
-        <p className="center-subtitle">{t("subtitle", "O XNaMai Club possui dois planos: Basic e Prioridade.")}</p>
+        <p className="center-subtitle">{t("memberSubtitle", "O Club Xnamai tem duas categorias: Sócio Xnamai e Sócio Prime.")}</p>
         <section className="rules-fastpass" aria-label="Comparativo de antecedência dos planos">
           <div><span>BASIC</span><strong>24H</strong><small>antecedência mínima</small></div>
           <div><span>PRIORIDADE</span><strong>6H</strong><small>antecedência mínima</small></div>
@@ -143,10 +143,10 @@ export function Rules() {
                 <header>
                   <span className="rules-number">{rule.number}</span>
                   <Icon />
-                  <h2>{t(`rule${rule.number}Title`, rule.title)}</h2>
+                  <h2>{t(`clubRule${rule.number}Title`, rule.title)}</h2>
                 </header>
                 <ul>
-                  {rule.items.map((item, index) => <li key={index}>{(rule.number === '01' && (index === 1 || index === 2)) || (rule.number === '07' && index === 0) ? item : t(`rule${rule.number}Item${index}`, item)}</li>)}
+                  {rule.items.map((item, index) => <li key={index}>{(rule.number === '01' && (index === 1 || index === 2)) || (rule.number === '07' && index === 0) ? item : t(`clubRule${rule.number}Item${index}`, item)}</li>)}
                 </ul>
                 {rule.chips && (
                   <div className="rules-chips">
@@ -158,7 +158,7 @@ export function Rules() {
           })}
         </ol>
         <div className="rules-cta">
-          <button className="btn primary large" onClick={() => navigate('/planos')}>{t("cta", "Conhecer os planos")}</button>
+          <button className="btn primary large" onClick={() => navigate('/planos')}>{t("memberCta", "Quero ser sócio")}</button>
         </div>
       </main>
     </>

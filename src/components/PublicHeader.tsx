@@ -45,7 +45,7 @@ export function PublicHeader() {
       </Link>
       <nav className="nav-links" id="site-nav">
         <NavLink to="/">Início</NavLink>
-        <NavLink to="/planos">Planos</NavLink>
+        <NavLink to="/planos">Categorias</NavLink>
         <NavLink to="/regras">Regras</NavLink>
         <NavLink to="/simulador">Simulador</NavLink>
         <a
@@ -59,14 +59,14 @@ export function PublicHeader() {
         >
           Catálogo
         </a>
-        {user?.role === 'CUSTOMER' && <NavLink to="/app">Minha conta</NavLink>}
+        {user?.role === 'CUSTOMER' && <NavLink to="/app">Área do sócio</NavLink>}
         {user?.role === 'CUSTOMER' && <NavLink to="/app/cadastro-empresa">Dados da empresa</NavLink>}
         {user?.role === 'ADMIN' && <NavLink to="/admin">Admin</NavLink>}
         <div className="nav-drawer-actions">
           {!user ? (
             <>
               <button className="btn ghost full" type="button" onClick={() => go('/login')}>Entrar</button>
-              <Link className="btn primary full" to="/planos" onClick={() => setMenuOpen(false)}>Quero assinar</Link>
+              <Link className="btn primary full" to="/planos" onClick={() => setMenuOpen(false)}>Quero ser sócio</Link>
             </>
           ) : (
             <button
@@ -86,7 +86,7 @@ export function PublicHeader() {
         {!user ? (
           <>
             <button className="btn ghost" type="button" onClick={() => navigate('/login')}>Entrar</button>
-            <Link className="btn primary" to="/planos">Quero assinar</Link>
+            <Link className="btn primary" to="/planos">Quero ser sócio</Link>
           </>
         ) : (
           <button

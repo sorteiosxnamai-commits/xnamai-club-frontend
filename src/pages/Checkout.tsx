@@ -65,8 +65,8 @@ export function Checkout() {
     } catch (error) { setError((error as Error).message); setBusy(false); }
   }
   return <><PublicHeader /><main className="checkout-page">
-    <h1>Upgrade para o Plano Fast Pass</h1>
-    <p>A assinatura atual será atualizada na Stripe, sem criar uma segunda assinatura.</p>
+    <h1>Upgrade para Sócio Xnamai Prime</h1>
+    <p>A mensalidade atual será atualizada na Stripe, sem criar uma segunda cobrança recorrente.</p>
     <section className="checkout-grid">
       <aside className="panel plan-summary"><h2>{plan.name}</h2><PlanPrice plan={plan} />
         <ul>{planBenefits(plan).map(benefit => <li key={benefit}>{benefit}</li>)}</ul>

@@ -4,59 +4,64 @@ export const contentCatalog = {
     "url": "/",
     "fields": [
       {
-        "key": "eyebrow",
+        "key": "heroEyebrow",
         "label": "Chamada",
-        "value": "CLUBE DE VANTAGENS EMPRESARIAIS"
+        "value": "CLUBE EXCLUSIVO DE COMPRAS PARA LOJISTAS"
       },
       {
-        "key": "intro",
+        "key": "heroTitle",
         "label": "Título principal",
-        "value": "Compre melhor. Economize mais. "
+        "value": "Seja sócio da Xnamai."
+      },
+      {
+        "key": "heroSubtitle",
+        "label": "Subtítulo",
+        "value": "Compre melhor. Economize mais. Cresça junto."
+      },
+      {
+        "key": "heroLead",
+        "label": "Apresentação",
+        "value": "Faça parte do clube de compras da Xnamai e tenha acesso a preços exclusivos, oportunidades comerciais e condições especiais para o seu negócio."
       },
       {
         "key": "title",
         "label": "Destaque do título",
-        "value": "Cresça com o XNaMai Club."
+        "value": "Preço de quase caixa fechada. Sem precisar comprar caixa fechada."
       },
       {
-        "key": "description",
-        "label": "Apresentação",
-        "value": "Assinaturas empresariais com condições comerciais exclusivas, economia estimada e acompanhamento completo da sua assinatura."
+        "key": "ctaJoin",
+        "label": "Botão principal",
+        "value": "Quero ser sócio"
       },
       {
-        "key": "simulate",
-        "label": "Botão do simulador",
-        "value": "Simular economia "
+        "key": "ctaBenefits",
+        "label": "Botão secundário",
+        "value": "Conhecer as vantagens"
       },
       {
-        "key": "plans",
-        "label": "Botão de planos",
-        "value": "Ver plano"
+        "key": "cardPriceTitle",
+        "label": "Card de preço — título",
+        "value": "Quase caixa fechada"
       },
       {
-        "key": "saving",
-        "label": "Descrição de economia",
-        "value": "Faixa estimada de economia em compras elegíveis."
+        "key": "cardExclusiveTitle",
+        "label": "Card de preços exclusivos — título",
+        "value": "Preços exclusivos"
       },
       {
-        "key": "secureTitle",
-        "label": "Título de segurança",
-        "value": "Assinatura segura"
+        "key": "cardExclusive",
+        "label": "Card de preços exclusivos — texto",
+        "value": "Condições comerciais disponibilizadas aos sócios Xnamai."
       },
       {
-        "key": "secure",
-        "label": "Descrição de segurança",
-        "value": "Fluxo protegido, autenticação e cobrança tokenizada."
+        "key": "cardQuantityTitle",
+        "label": "Card de quantidade — título",
+        "value": "Na quantidade que precisa"
       },
       {
-        "key": "visibilityTitle",
-        "label": "Título de acompanhamento",
-        "value": "Visibilidade total"
-      },
-      {
-        "key": "visibility",
-        "label": "Descrição de acompanhamento",
-        "value": "Acompanhe plano, cobranças e situação da assinatura."
+        "key": "cardQuantity",
+        "label": "Card de quantidade — texto",
+        "value": "Compre sem a obrigação de caixa fechada, conforme as condições de cada produto."
       }
     ]
   },

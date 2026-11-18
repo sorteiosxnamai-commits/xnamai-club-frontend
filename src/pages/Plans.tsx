@@ -27,14 +27,14 @@ type CurrentSubscription = {
 
 export function planBenefits(plan: Plan) {
   if (plan.code === 'PRIORITY') return [
-    'Tudo do Plano Basic',
-    'Fast Pass: pedido no mesmo dia',
+    'Todas as vantagens do Sócio Xnamai',
+    'Fura fila: pedido no mesmo dia',
     'Antecedência mínima de 6 horas',
     'Prioridade na separação do pedido',
-    'XNaMai Lab — exclusivo para os 50 membros',
+    'XNaMai Lab — exclusivo para os 50 sócios',
   ];
   return [
-    'Preços exclusivos do Club',
+    'Preços exclusivos para sócios',
     'Compre sem precisar fechar caixa',
     'Pedido com antecedência mínima de 24 horas',
   ];
@@ -85,9 +85,9 @@ export function Plans() {
   return <>
     <PublicHeader />
     <main className="public-page plans-page launch-plans">
-      <div className="eyebrow">👑 PLANOS XNAMAI CLUB</div>
-      <h1 className="center-title"><span>XNaMai</span> Club</h1>
-      <p className="center-subtitle">{t("subtitle", "Basic para comprar melhor. Prioridade para pedir mais rápido.")}</p>
+      <div className="eyebrow">CATEGORIAS DE SÓCIO</div>
+      <h1 className="center-title">Escolha como você quer <span>fazer parte</span></h1>
+      <p className="center-subtitle">{t("memberSubtitle", "Duas formas de aproveitar as vantagens do Club Xnamai.")}</p>
       {error && <div className="error-box" role="alert">{error}</div>}
       <div className="plans-grid">
         {plans.map((plan) => {
@@ -101,13 +101,13 @@ export function Plans() {
             && plan.code === 'LAUNCH';
           return (
           <article className={`plan-card featured${priority ? ' priority-plan' : ' basic-plan'}`} key={plan.id}>
-            <div className="recommended">{priority ? '⚡ FAST PASS — APENAS 50 VAGAS' : 'PLANO BASIC'}</div>
+            <div className="recommended">{priority ? 'SÓCIO PRIME — 50 VAGAS' : 'SÓCIO XNAMAI'}</div>
             <div className="plan-icon"><Diamond /></div>
             <h3>{asaasOffer(plan.code)?.name ?? plan.name}</h3>
             <PlanPrice plan={plan} />
-            <p>{t("eligibility", "Exclusivo para clientes lojistas com cadastro CNPJ.")}</p>
+            <p>{t("memberEligibility", "Exclusivo para lojistas e empreendedores com CNPJ.")}</p>
             <div className="plan-promise">
-              <strong>{priority ? 'O Fast Pass da XNaMai' : 'Acesso aos preços exclusivos do XNaMai Club'}</strong>
+              <strong>{priority ? 'Prioridade na separação e XNaMai Lab' : 'Preços exclusivos para sócios'}</strong>
               {priority && (
                 <p>{t("fastDescription", "Faça seu pedido com antecedência mínima de 6 horas para separação e envio no mesmo dia, dentro do nosso horário de operação.")}</p>
               )}
@@ -118,13 +118,13 @@ export function Plans() {
               <small>antecedência mínima</small>
             </div>
             <ul>
-              {planBenefits(plan).map((benefit, index) => <li key={index}><Check /> {t(`${plan.code}Benefit${index}`, benefit)}</li>)}
+              {planBenefits(plan).map((benefit, index) => <li key={index}><Check /> {t(`member${plan.code}Benefit${index}`, benefit)}</li>)}
             </ul>
             {priority && (
               <>
                 <div className="plan-capacity">
                   <strong>🔒 APENAS 50 CLIENTES</strong>
-                  <p>{t("capacity", "O Plano Prioridade é limitado a 50 clientes para garantir que a prioridade realmente funcione.")}</p>
+                  <p>{t("memberCapacity", "O Sócio Prime é limitado a 50 participantes para que a prioridade de separação funcione.")}</p>
                 </div>
                 <div className="plan-lab">
                   <strong>🔬 XNaMai Lab</strong>
@@ -137,7 +137,7 @@ export function Plans() {
               disabled={current || included || (priority && plan.availability?.remaining === 0)}
               onClick={() => choose(plan)}
             >
-              {current ? 'PLANO ATUAL' : included ? 'INCLUSO NO PLANO ATUAL' : priority && plan.availability?.remaining === 0 ? 'VAGAS ESGOTADAS' : upgrade ? 'FAZER UPGRADE' : priority ? 'QUERO O FAST PASS' : 'ASSINAR BASIC'}
+              {current ? 'SUA CATEGORIA' : included ? 'INCLUSO NA SUA CATEGORIA' : priority && plan.availability?.remaining === 0 ? 'VAGAS ESGOTADAS' : upgrade ? 'QUERO SER SÓCIO PRIME' : priority ? 'QUERO SER SÓCIO PRIME' : 'QUERO SER SÓCIO'}
             </button>
           </article>
           );

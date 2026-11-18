@@ -25,7 +25,7 @@ test('priority plan exposes its benefits and uses the Stripe upgrade flow', () =
   const checkout = readFileSync(new URL('../src/pages/Checkout.tsx', import.meta.url), 'utf8');
   assert.match(plans, /plan\.code === 'PRIORITY'/);
   assert.match(plans, /Prioridade na separação do pedido/);
-  assert.match(plans, /FAST PASS — APENAS 50 VAGAS/);
+  assert.match(plans, /SÓCIO PRIME — 50 VAGAS/);
   assert.match(plans, /Antecedência mínima de 6 horas/);
   assert.match(plans, /Grupo exclusivo para até 50 membros/);
   assert.match(plans, /Pedido com antecedência mínima de 24 horas/);
@@ -42,20 +42,20 @@ test('the atendimento table displays each customer plan', () => {
 test('Basic customers can start an upgrade from their dashboard', () => {
   const dashboard = readFileSync(new URL('../src/pages/CustomerDashboard.tsx', import.meta.url), 'utf8');
   assert.match(dashboard, /subscription\.plan\?\.code === 'LAUNCH'/);
-  assert.match(dashboard, /Fazer upgrade para o Plano Prioridade/);
+  assert.match(dashboard, /Quero ser Sócio Prime/);
   assert.match(dashboard, /sessionStorage\.setItem\('selected_plan'/);
 });
 
 test('customers with scheduled cancellation can resume the Basic plan', () => {
   const dashboard = readFileSync(new URL('../src/pages/CustomerDashboard.tsx', import.meta.url), 'utf8');
-  assert.match(dashboard, /Continuar no Plano Basic/);
+  assert.match(dashboard, /Continuar como Sócio Xnamai/);
   assert.match(dashboard, /\/subscriptions\/\$\{subscription\.id\}\/resume/);
 });
 
 test('rules distinguish Basic and Priority without advertising expired cashback', () => {
   const rules = readFileSync(new URL('../src/pages/Rules.tsx', import.meta.url), 'utf8');
-  assert.match(rules, /Plano Basic: R\$ 149,97\/mês/);
-  assert.match(rules, /Plano Prioridade: R\$ 297,97\/mês/);
+  assert.match(rules, /Sócio Xnamai: R\$ 149,97\/mês/);
+  assert.match(rules, /Sócio Xnamai Prime: R\$ 297,97\/mês/);
   assert.match(rules, /separação e envio no mesmo dia/);
   assert.match(rules, /não garante a aquisição, disponibilidade ou inclusão/);
   assert.match(rules, /PRIORIDADE[\s\S]*<strong>6H<\/strong>/);

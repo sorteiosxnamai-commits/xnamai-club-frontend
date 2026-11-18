@@ -143,7 +143,7 @@ export function CustomerDashboard() {
       await loadDashboard();
       setSuccess(
         result.status === 'CANCELLED'
-          ? 'Assinatura encerrada. Para pagar novamente, clique em Assinar novamente.'
+          ? 'Participação encerrada. Para voltar ao clube, escolha uma categoria.'
           : subscription.currentPeriodEnd
           ? `Cancelamento confirmado. Você continua com acesso até ${accessUntil} e não haverá novas cobranças.`
           : 'Cancelamento confirmado. Não haverá novas cobranças.',
@@ -269,7 +269,7 @@ export function CustomerDashboard() {
     try {
       await api(`/subscriptions/${subscription.id}/resume`, { method: 'POST', body: '{}' });
       await loadDashboard();
-      setSuccess('Assinatura retomada. Você continuará no Plano Basic normalmente.');
+      setSuccess('Participação retomada. Você continua como Sócio Xnamai.');
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -282,8 +282,8 @@ export function CustomerDashboard() {
       <PublicHeader />
       <main className="dashboard-page">
         <div className="dashboard-heading">
-          <h1>Área do cliente</h1>
-          <p>Acompanhe sua assinatura e cobranças do XNaMai Club.</p>
+          <h1>Bem-vindo ao seu Club Xnamai</h1>
+          <p>Você faz parte do nosso clube de sócios.</p>
         </div>
         {error && (
           <div className="error-box" role="alert">
@@ -309,8 +309,8 @@ export function CustomerDashboard() {
             <section className="customer-top">
               <div className="panel current-plan">
                 <div>
-                  <small>PLANO ATUAL</small>
-                  <h2>{subscription?.plan?.name || 'Sem plano'}</h2>
+                  <small>CATEGORIA ATUAL</small>
+                  <h2>{subscription?.plan?.code === 'PRIORITY' ? 'Sócio Xnamai Prime' : subscription?.plan?.code === 'LAUNCH' ? 'Sócio Xnamai' : subscription?.plan?.name || 'Sem categoria'}</h2>
                   <div className="big-number">{money(isPix ? pixMonthPriceCents(subscription?.plan?.code) : subscription?.plan?.monthlyPriceCents)}<small>/mês</small></div>
                 </div>
                 <div className="status-line"><CheckCircle2 /><span>Status</span><b>{statusText}</b></div>
@@ -387,29 +387,29 @@ export function CustomerDashboard() {
                         {busy
                           ? 'Preparando upgrade…'
                           : cancelScheduled
-                            ? 'Reativar e fazer upgrade para o Plano Prioridade'
-                            : 'Fazer upgrade para o Plano Prioridade'}
+                            ? 'Reativar e virar Sócio Prime'
+                            : 'Quero ser Sócio Prime'}
                       </button>
                     )}
                     {cancelScheduled && (
                       <button className="btn ghost" type="button" disabled={busy} onClick={resumeSubscription}>
-                        {busy ? 'Retomando…' : 'Continuar no Plano Basic'}
+                        {busy ? 'Retomando…' : 'Continuar como Sócio Xnamai'}
                       </button>
                     )}
                     {canCancel && !confirming && (
                       <button className="btn danger" type="button" onClick={() => setConfirming(true)}>
-                        Cancelar assinatura
+                        Cancelar mensalidade
                       </button>
                     )}
                     {canCancel && confirming && (
                       <>
                         <p>
                           Tem certeza? O acesso aos preços do Club permanece até {accessUntil}.
-                          Depois disso a assinatura encerra e não haverá novas cobranças.
+                          Depois disso a participação encerra e não haverá novas cobranças.
                         </p>
                         <div className="cancel-confirm">
                           <button className="btn ghost" type="button" disabled={busy} onClick={() => setConfirming(false)}>
-                            Manter assinatura
+                            Manter mensalidade
                           </button>
                           <button className="btn danger" type="button" disabled={busy} onClick={cancelSubscription}>
                             {busy ? 'Cancelando…' : 'Confirmar cancelamento'}
@@ -425,7 +425,7 @@ export function CustomerDashboard() {
                     {isCancelled && (
                       <>
                         <p>Assinatura cancelada. O acesso aos preços exclusivos do Club foi encerrado.</p>
-                        {!canPayAgain && <Link className="btn primary" to="/planos">Assinar novamente</Link>}
+                        {!canPayAgain && <Link className="btn primary" to="/planos">Quero ser sócio</Link>}
                       </>
                     )}
                   </div>
@@ -433,7 +433,7 @@ export function CustomerDashboard() {
               </div>
               <div className="metric-card">
                 <CheckCircle2 />
-                <span>Status da assinatura</span>
+                <span>Situação da participação</span>
                 <strong>{statusText}</strong>
               </div>
               <div className="metric-card">

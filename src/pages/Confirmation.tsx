@@ -61,7 +61,7 @@ export function Confirmation() {
           <span className="active">4 Confirmação</span>
         </div>
         <CheckCircle2 className="success-icon" />
-        <h1>{error ? 'Pagamento em conferência' : waitingPix ? 'Aguardando o PIX' : 'Assinatura confirmada!'}</h1>
+        <h1>{error ? 'Pagamento em conferência' : waitingPix ? 'Aguardando o PIX' : 'Adesão confirmada!'}</h1>
         <p>
           {error
             ? error
@@ -74,10 +74,10 @@ export function Confirmation() {
               : 'Confirmando autorização na Stripe...'}
         </p>
         <div className="confirmation-card">
-          <h2>{error ? 'Se o PIX já foi pago, abra sua área. O acesso libera quando a Stripe confirmar.' : waitingPix ? 'Confirmando o pagamento' : 'Pagamento aprovado e assinatura ativa'}</h2>
-          <p>Acompanhe plano, cobrança e situação na sua área.</p>
+          <h2>{error ? 'Se o PIX já foi pago, abra sua área. O acesso libera quando a Stripe confirmar.' : waitingPix ? 'Confirmando o pagamento' : 'Pagamento aprovado e participação ativa'}</h2>
+          <p>Acompanhe a categoria, a cobrança e a situação na área do sócio.</p>
           <button className="btn primary large" onClick={() => nav('/app')} disabled={!ready && !error}>
-            Ir para minha assinatura
+            Ir para a área do sócio
           </button>
         </div>
       </main>

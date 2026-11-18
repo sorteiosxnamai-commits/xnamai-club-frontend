@@ -51,6 +51,6 @@ test('restoring defaults stays in the draft until publication', async () => {
   render(<MemoryRouter><AdminContent /></MemoryRouter>);
   expect((await screen.findByLabelText('Destaque do título') as HTMLTextAreaElement).value).toBe('Título anterior');
   await userEvent.click(screen.getByRole('button', { name: 'Restaurar padrão' }));
-  expect((screen.getByLabelText('Destaque do título') as HTMLTextAreaElement).value).toBe('Cresça com o XNaMai Club.');
+  expect((screen.getByLabelText('Destaque do título') as HTMLTextAreaElement).value).toBe('Preço de quase caixa fechada. Sem precisar comprar caixa fechada.');
   expect(apiMock.mock.calls.some(([, options]) => options?.method === 'PUT')).toBe(false);
 });
