@@ -80,10 +80,10 @@ test('when Fast Pass is full, the portal shows the rejection before navigating t
 });
 
 
-test('a legacy CPF account is sent to regularization before exposing a payment link', async () => {
+test('a CPF account can open the payment link', async () => {
   sessionStorage.setItem('selected_plan', JSON.stringify({ id: 'plan', code: 'LAUNCH' }));
-  apiMock.mockImplementation(async (path: string) => path === '/auth/me' ? { document: '52998224725', companyName: 'Antiga' } : null);
+  apiMock.mockImplementation(async (path: string) => path === '/auth/me' ? { document: '01179041984', companyName: 'Leonardo Hoffmann' } : null);
   render(<MemoryRouter><Checkout /></MemoryRouter>);
-  expect((await screen.findByRole('link', { name: 'Informar CNPJ da empresa' })).getAttribute('href')).toBe('/app/cadastro-empresa');
-  expect(screen.queryByRole('link', { name: /Confirmar adesão.*Asaas/ })).toBeNull();
+  expect(await screen.findByRole('link', { name: /Confirmar adesão.*Asaas/ })).toBeTruthy();
+  expect(screen.queryByRole('link', { name: 'Informar CNPJ da empresa' })).toBeNull();
 });

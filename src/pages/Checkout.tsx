@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { isValidCnpj } from '../cnpj';
+import { isValidCustomerDocument } from '../cnpj';
 import { api, ApiRequestError, money } from '../api/client';
 import { PublicHeader } from '../components/PublicHeader';
 import { Plan, PlanPrice, planBenefits } from './Plans';
@@ -37,7 +37,7 @@ export function Checkout() {
   if (subscription === undefined) return <><PublicHeader /><main className="checkout-page">
     {error ? <div className="error-box" role="alert">{error}</div> : <p>Carregando assinatura atual...</p>}
   </main></>;
-  if (!isValidCnpj(business?.document || '') || (business?.companyName?.trim().length || 0) < 2) return <><PublicHeader /><main className="checkout-page panel">
+  if (!isValidCustomerDocument(business?.document || '') || (business?.companyName?.trim().length || 0) < 2) return <><PublicHeader /><main className="checkout-page panel">
     <h1>Regularize o cadastro da empresa</h1><p>Os planos são exclusivos para lojistas com CNPJ. O período já pago continua disponível na sua conta.</p>
     <Link className="btn primary" to="/app/cadastro-empresa">Informar CNPJ da empresa</Link>
     <Link className="btn ghost" to="/app">Minha conta</Link>
