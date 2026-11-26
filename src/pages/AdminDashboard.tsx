@@ -107,8 +107,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
             <strong>{money(months[months.length - 1]?.revenueCents ?? metrics.monthlyRevenueCents)}</strong>
           </div>
           <p className="forecast-copy">
-            Cada mês soma a MRR daquele momento e a receita avulsa paga nele.
-            {metrics.oneTimeRevenueCents ? ` Neste mês, ${money(metrics.oneTimeRevenueCents)} são avulsos.` : ''}
+            Cada mês é o que foi recebido na Stripe e no Asaas. A MRR não entra de novo.
           </p>
           <RevenueBars months={months} />
         </div>
