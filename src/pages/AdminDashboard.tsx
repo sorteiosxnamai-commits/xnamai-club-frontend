@@ -107,7 +107,7 @@ function DashboardBody({ metrics }: { metrics: Metrics }) {
             <strong>{money(months[months.length - 1]?.revenueCents ?? metrics.monthlyRevenueCents)}</strong>
           </div>
           <p className="forecast-copy">
-            Cada mês é o que foi recebido na Stripe e no Asaas. A MRR não entra de novo.
+            Meses fechados mantêm a foto do fim do mês. O mês atual é o que foi recebido na Stripe e no Asaas.
           </p>
           <RevenueBars months={months} />
         </div>
